@@ -1,0 +1,26 @@
+<main
+  class="relative main-wrapper flex w-full h-screen overflow-hidden border-2"
+>
+  <div class="flex justify-center items-center border w-full">
+    <div class="flex flex-col bg-white w-[400px] h-[400px] shadow-md">
+      <div>
+        <div class="overflow-hidden flex justify-center py-5 items-center">
+          <img
+            class="h-[48px] w-[48px]"
+            src="../assets/evalsys_logo.svg"
+            alt=""
+          />
+          <span class="font-bold text-xl">EVALSYS</span>
+        </div>
+      </div>
+      <div class="w-full  flex flex-col px-10">
+        <span class="font-semibold text-xl">Sign In</span>
+        <input class="border border-[#CECECE] text-sm p-2 mt-2 transition" type="text " placeholder="Username" #username>
+        <input class="border border-[#CECECE] text-sm p-2 mt-2 transition-all" type="text " placeholder="Password" #password>
+
+        <button (click)="handle_signin(username.value, password.value)" class="cursor-pointer text-sm w-full bg-[#284715] py-2 text-white mt-3">Secure Sign-in</button>
+      </div>
+      <p class="text-center text-sm px-12 mt-10">Note: You can use the username 'admin' and password 'admin' to log in.</p>
+    </div>
+  </div>
+</main>

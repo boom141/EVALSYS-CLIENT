@@ -1,0 +1,27 @@
+import { HttpClient } from '@angular/common/http';
+import { Component, inject } from '@angular/core';
+import { Navigation_Service } from '../../../core/services/navigation.service';
+import { Auth_Service } from '../../../core/services/auth.service';
+
+@Component({
+  selector: 'app-login',
+  imports: [],
+  templateUrl: './login.component.html',
+  styleUrl: './login.component.scss'
+})
+export class LoginComponent {
+  private _api = inject(HttpClient)
+  private _navigation = inject(Navigation_Service)
+  private _auth_service = inject(Auth_Service)
+
+  handle_signin(username:string, password:string){
+    this._api.post('http://127.0.0.1:8089/auth', { username, password })
+    .subscribe(
+      res => {
+        this._auth_service.sign_in(res)
+        this._navigation.navigate_to_link('admin/overview')
+      },
+      err => console.log(err)
+    )
+  }
+}

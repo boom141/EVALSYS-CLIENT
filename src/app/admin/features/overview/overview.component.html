@@ -1,0 +1,112 @@
+<main>
+  <div class="flex flex-col space-y-8 p-5">
+    <div class="flex flex-col">
+        <h1 class="text-3xl font-semibold overflow-hidden">Overview</h1>
+        <p class="text-sm">Get a summarized view of faculty evaluations, scores, and overall performance.</p>
+    </div>
+
+
+    <div class="flex flex-row space-x-5 w-full mt-5">
+      <p-card class="w-full flex flex-col  shadow-lg mb-3 !rounded-none">
+
+          <span class="text-4xl font-bold text-primary">{{ infocards_data.outstanding.count }}</span>
+   
+        <div class="mt-2">
+          <p class="text-sm font-medium text-primary">{{ infocards_data.outstanding.label }}</p>
+        </div>
+      </p-card>
+      <p-card class="w-full flex flex-col  shadow-lg mb-3 !rounded-none">
+    
+          <span class="text-4xl font-bold text-primary">{{ infocards_data.agree.count }}</span>
+        
+        <div class="mt-2">
+          <p class="text-sm font-medium text-primary">{{ infocards_data.agree.label }}</p>
+        </div>
+      </p-card>
+      <p-card class="w-full flex flex-col  shadow-lg mb-3 !rounded-none">
+ 
+          <span class="text-4xl font-bold text-primary">{{ infocards_data.neutral.count }}</span>
+     
+        <div class="mt-2">
+          <p class="text-sm font-medium text-primary">{{ infocards_data.neutral.label }}</p>
+        </div>
+      </p-card>
+      <p-card class="w-full flex flex-col  shadow-lg mb-3 !rounded-none">
+     
+          <span class="text-4xl font-bold text-primary">{{ infocards_data.disagree.count }}</span>
+   
+        <div class="mt-2">
+          <p class="text-sm font-medium text-primary">{{ infocards_data.disagree.label }}</p>
+        </div>
+      </p-card>
+      <p-card class="w-full flex flex-col  shadow-lg mb-3 !rounded-none">
+ 
+          <span class="text-4xl font-bold text-primary">{{ infocards_data.strongly_disagree.count }}</span>
+    
+        <div class="mt-2">
+          <p class="text-sm font-medium text-primary">{{ infocards_data.strongly_disagree.label }}</p>
+        </div>
+      </p-card>
+    </div>
+    <div class="flex flex-row justify-between gap-3">
+        <div class="shadow-md w-full p-3 bg-white mb-3">
+          <h1 class="text-base">Sentiment Polarity Count</h1>
+          <div class="m-5 max-h-[300px]" id="sentiments_barchart"></div>
+        </div>
+        <div class="shadow-md mb-3 w-full p-3 bg-white max-w-[400px]">
+          <h1 class="text-base">Students Participation Score</h1>
+          <div class="m-5  max-h-[300px]" id="participation_score"></div>
+        </div>
+    </div>
+    <div class="flex flex-row justify-between gap-3">
+      <div class="shadow-md mb-3 w-full p-3 bg-white">
+        <h1 class="text-base font-medium">Positve Polarity Feedbacks</h1>
+        <div class="mt-5 overflow-auto overflow-x-hidden max-h-[500px]">
+            @for(data of postive_sentiments_data; track $index){
+                <div class="flex flex-col p-3 border-l-2 border-[#43900C] mt-3">
+                  <p class="w-[250px] text-sm italic">
+                    "{{data.message}}"
+                  </p>
+                  <div class="flex w-full justify-between mt-5">
+                    <span class="text-sm text-slate-400">Anonymous</span>
+                    <span class="text-sm text-slate-400">{{data.timestamp}}</span>
+                  </div>
+                </div>
+            }
+        </div>
+      </div>
+      <div class="shadow-md mb-3 w-full p-3 bg-white ">
+        <h1 class="text-base font-medium">Neutral Polarity Feedbacks</h1>
+        <div class="mt-5 overflow-auto overflow-x-hidden max-h-[500px] mt-3">
+                @for(data of neutral_sentiments_data; track $index){
+                <div class="flex flex-col p-3 border-l-2 border-[#CECECE] mt-3">
+                  <p class="w-[250px] text-sm italic">
+                    "{{data.message}}"
+                  </p>
+                  <div class="flex w-full justify-between mt-5">
+                    <span class="text-sm text-slate-400">Anonymous</span>
+                    <span class="text-sm text-slate-400">{{data.timestamp}}</span>
+                  </div>
+                </div>
+            }
+        </div>
+      </div>
+      <div class="shadow-md mb-3 w-full p-3 bg-white">
+        <h1 class="text-base font-medium">Negative Polarity Feedbacks</h1>
+        <div class="mt-5 overflow-auto overflow-x-hidden max-h-[500px]">
+            @for(data of negative_sentiments_data; track $index){
+                <div class="flex flex-col p-3 border-l-2 border-[#DD1111] mt-3">
+                  <p class="w-[250px] text-sm italic ">
+                    "{{data.message}}"
+                  </p>
+                  <div class="flex w-full justify-between mt-5">
+                    <span class="text-sm text-slate-400">Anonymous</span>
+                    <span class="text-sm text-slate-400">{{data.timestamp}}</span>
+                  </div>
+                </div>
+            }
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
