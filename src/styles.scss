@@ -11,3 +11,23 @@
 body{
     background-color: #EFEFEF;
 }
+
+/* Make scrollbar track transparent */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Optional: make scrollbar background transparent (whole scrollbar) */
+::-webkit-scrollbar {
+  background: transparent;
+}
+
+/* You can also style the thumb if you want */
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.5); /* semi-transparent thumb */
+}
+
+::-webkit-scrollbar {
+  width: 6px; /* or any value like 8px, 12px */
+
+}

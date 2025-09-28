@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { Navigation_Service } from '../../../core/services/navigation.service';
 import { Auth_Service } from '../../../core/services/auth.service';
+import { dev_config } from '../../../environments/dev.env';
 
 @Component({
   selector: 'app-login',
@@ -15,7 +16,7 @@ export class LoginComponent {
   private _auth_service = inject(Auth_Service)
 
   handle_signin(username:string, password:string){
-    this._api.post('http://127.0.0.1:8089/auth', { username, password })
+    this._api.post(`${dev_config.api_base_url}/auth`, { username, password })
     .subscribe(
       res => {
         this._auth_service.sign_in(res)

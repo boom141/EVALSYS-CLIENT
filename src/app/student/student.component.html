@@ -1,0 +1,232 @@
+<main class="relative main-wrapper flex w-full h-screen overflow-hidden">
+  <div class="flex flex-col w-full">
+    <div
+      class="text-white bg-[#284715] h-[90px] w-full shadow-[0_4px_10px_rgba(0,0,0,0.5)] flex justify-between items-center px-5 flex-none"
+    >
+      <div class="overflow-hidden text-white flex items-center">
+        <div class="overflow-hidden">
+          <img
+            class="h-[48px] w-[48px]"
+            src="../assets/evalsys_logo.svg"
+            alt=""
+          />
+        </div>
+        <div class="flex flex-col">
+          <span class="font-bold text-base">EVALSYS</span>
+          <span class="font-light text-sm text-[10px]"
+            >Universidad de Manila</span
+          >
+        </div>
+      </div>
+
+      <div class="flex space-x-3 items-center cursor-pointer">
+        <i class="pi pi-user"></i>
+        <span>Joseph Naval</span>
+      </div>
+    </div>
+
+    <div class="flex flex-col px-[8rem] h-screen">
+      <div class="flex flex-col flex-none mt-5 ">
+        <h1 class="text-3xl font-semibold overflow-hidden">
+          STUDENT EVALUATION HUB
+        </h1>
+        <p class="text-sm">
+          Evaluate your instructors and help improve teaching quality
+        </p>
+      </div>
+
+      @if(selected_faculty === null){
+      <div class="flex flex-col space-y-5 justify-between items-center w-full">
+        <div class="w-full">
+          <div class="shadow-md w-[300px] bg-white flex items-center mb-3">
+            <input
+              (input)="onGlobalFilterChange($event)"
+              class="px-3 py-2 outline-none text-sm w-full"
+              type="text"
+              placeholder="Search keyword"
+            />
+            <div class="px-3 py-2">
+              <i class="pi pi-search"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-full bg-white shadow-md mb-3">
+          <div class="w-full">
+            <p-table
+              [value]="pagedData"
+              [rows]="rows"
+              [scrollable]="true"
+              [scrollHeight]="'320px'"
+              class="w-full max-w-screen-lg text-sm text-primary"
+            >
+              <ng-template pTemplate="header">
+                <tr class="text-left text-xs md:text-sm">
+                  <th class="p-5">Name</th>
+                  <th class="p-5">Department</th>
+                  <th class="p-5">Subject Code</th>
+                  <th class="p-5">Subject</th>
+                  <th class="p-5">Status</th>
+                  <th class="p-5"></th>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="body" let-rowData>
+                <tr class="hover:!bg-slate-100 cursor-pointer">
+                  <td>{{ rowData.name }}</td>
+                  <td>{{ rowData.department }}</td>
+                  <td class="w-36">
+                    {{ rowData.subject_code }}
+                  </td>
+                  <td>{{ rowData.subject }}</td>
+                  <td>
+                    <span
+                      class="text-sm text-green-500 bg-green-100 py-1 px-2 font-medium rounded-md text-base"
+                    >
+                      Completed
+                    </span>
+                  </td>
+                  <td>
+                    <div class="flex justify-center items-center">
+                      <i class="pi pi-chevron-right"></i>
+                    </div>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+          <div class="w-full">
+            <p-paginator
+              (onPageChange)="onPageChange($event)"
+              [first]="first"
+              [rows]="rows"
+              [totalRecords]="total_records"
+              class="text-xs md:text-sm rounded-none mt-2"
+            ></p-paginator>
+          </div>
+        </div>
+      </div>
+      }@else {
+      <div class="flex flex-col space-y-5   mt-5">
+  
+        <div
+            class="flex flex-col flex-none bg-white w-full p-5 border-b-2 border-[#284715] shadow-md"
+          >
+            <div class="flex flex-col">
+              <span class="text-xl font-semibold ">
+                Faculty Evaluation Form SY 2025-2026
+              </span>
+              <span class="text-base overflow-hidden">
+                Evaluatee: Teacher's Name
+              </span>
+            </div>
+            <div class="flex flex-col mt-3">
+    
+            <span class="font-semibold">Understanding the 5-Point Evaluation Matrix</span>
+                    
+            <p >1: Strongly Disagree </p>
+            <p >2: Disagree </p>
+            <p >3: Neutral </p>
+            <p >4: Agree </p>
+            <p >5: Outstanding </p>
+        
+            </div>
+          </div>
+
+          @for(data of fetch_evaluation_questions; track $index; let category_indx = $index){
+              <div
+                class="font-semibold flex flex-none space-x-3 items-center bg-[#284715] w-full p-5 text-white shadow-md"
+              >
+                <img
+                  class="w-[16px] h-[16px]"
+                  src="https://img.icons8.com/?size=100&id=646&format=png&color=ffffff"
+                  alt=""
+                />
+                <span>{{data.category}}</span>
+              </div>
+               @for(question of data.questions; track $index; let question_indx = $index){
+                   <div
+                     class="flex flex-none flex-col space-y-5 bg-white w-full p-5 border-b-2 border-[#284715] shadow-md"
+                   >
+                     <span>
+                      {{$index + 1}}. {{question.text}}</span
+                     >
+         
+                     <div class="flex space-x-3 mb-5">
+                       <div
+                         (click)="modify_form_data(category_indx, question_indx, 1)"
+                         [ngClass]="{'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':question.score == 1}"
+                         class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
+                       >
+                         1
+                       </div>
+                       <div
+                         (click)="modify_form_data(category_indx, question_indx, 2)"
+                           [ngClass]="{'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':question.score == 2}"
+                         class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
+                       >
+                         2
+                       </div>
+                       <div
+                        (click)="modify_form_data(category_indx, question_indx, 3)"
+                          [ngClass]="{'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':question.score == 3}"
+                         class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
+                       >
+                         3
+                       </div>
+                       <div
+                        (click)="modify_form_data(category_indx, question_indx, 4)"
+                          [ngClass]="{'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':question.score == 4}"
+                         class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
+                       >
+                         4
+                       </div>
+                       <div
+                        (click)="modify_form_data(category_indx, question_indx, 5)"
+                          [ngClass]="{'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':question.score == 5}"
+                         class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
+                       >
+                         5
+                       </div>
+                     </div>
+                   </div>
+               }
+          }
+
+             <div
+                class="font-semibold flex flex-none space-x-3 items-center bg-[#284715] w-full p-5 text-white shadow-md"
+              >
+                <img
+                  class="w-[16px] h-[16px]"
+                  src="https://img.icons8.com/?size=100&id=646&format=png&color=ffffff"
+                  alt=""
+                />
+                <span>Your feedback matters! Feel free to share any suggestions, thoughts, or concerns about this faculty member below.</span>
+              </div>
+                <div
+                     class="flex flex-none flex-col space-y-5 bg-white w-full p-5 border-b-2 border-[#284715] shadow-md"
+                   >
+                <textarea class="text-black outline-none" cols="10"  placeholder="Share your thoughts with us!" #textarea></textarea>
+                </div>
+
+          <div class="flex flex-none space-x-3 mb-5">
+            <div
+              class="flex cursor-pointer bg-white w-full shadow-md p-3 justify-center items-center"
+            >
+              Cancel
+            </div>
+            <div
+            (click)="submit()"
+              class="flex cursor-pointer bg-[#284715] text-white w-full shadow-md p-3 justify-center items-center"
+            >
+              Submit
+            </div>
+          </div>
+
+
+      </div>
+
+      }
+    </div>
+  </div>
+</main>

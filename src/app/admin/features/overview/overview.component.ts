@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CardModule } from 'primeng/card';
 import { chart } from 'highcharts';
 import { HttpClient } from '@angular/common/http';
+import { dev_config } from '../../../environments/dev.env';
 
 
 @Component({
@@ -30,7 +31,11 @@ export class OverviewComponent {
   }
 
   fetch_data(){
-    this._api.get('http://127.0.0.1:8089/overview').subscribe((res:any)=>{
+    this._api.get(`${dev_config.api_base_url}/overview`, {
+      headers:{
+        "ngrok-skip-browser-warning": "true"
+      }
+    }).subscribe((res:any)=>{
       this.infocards_data = res.info_cards
       this.barchart_data = res.sentiment_data
       this.donut_data = res.participation_score

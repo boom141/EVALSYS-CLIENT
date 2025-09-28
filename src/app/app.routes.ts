@@ -5,6 +5,7 @@ import { AdminComponent } from './admin/admin.component';
 import { AuthenticationComponent } from './authentication/authentication.component';
 import { LoginComponent } from './authentication/features/login/login.component';
 import { auth_guard } from './core/guards/auth.guard';
+import { StudentComponent } from './student/student.component';
 
 export const routes: Routes = [
     {
@@ -13,6 +14,11 @@ export const routes: Routes = [
             {path: "faculty", component: FacultyComponent }
         ]
     },
+
+    {
+        path: 'student', component: StudentComponent
+    },
+
     {
         path: 'auth', component: AuthenticationComponent, children:[
             {path: 'login', component: LoginComponent}

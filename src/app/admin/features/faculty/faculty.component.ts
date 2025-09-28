@@ -8,6 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { HttpClient } from '@angular/common/http';
 import { CardModule } from 'primeng/card';
 import { chart } from 'highcharts';
+import { dev_config } from '../../../environments/dev.env';
 
 @Component({
   selector: 'app-faculty',
@@ -24,8 +25,8 @@ import { chart } from 'highcharts';
   styleUrl: './faculty.component.scss',
 })
 export class FacultyComponent {
-  public first: number = 0; // Start at the first record
-  public rows: number = 5; // Display 5 rows per page
+  public first: number = 0; 
+  public rows: number = 5; 
   public total_records!: number;
   public filtered_data: any[] = [];
   public source_data!: any[];
@@ -45,7 +46,11 @@ export class FacultyComponent {
   }
 
   fetch_data() {
-    this._api.get('http://127.0.0.1:8089/faculty').subscribe((res: any) => {
+    this._api.get(`${dev_config.api_base_url}/faculty` ,{
+            headers:{
+        "ngrok-skip-browser-warning": "true"
+      }
+    }).subscribe((res: any) => {
       this.source_data = res;
       this.total_records = this.source_data.length;
       this.filtered_data = [...this.source_data];
