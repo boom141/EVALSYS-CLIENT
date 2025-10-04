@@ -31,3 +31,27 @@ body{
   width: 6px; /* or any value like 8px, 12px */
 
 }
+
+.p-toast{
+  overflow-y: hidden;
+  
+  .p-toast-message-info, .p-toast-message-success, .p-toast-message-warn, .p-toast-message-error, .p-toast-message-secondary, .p-toast-message-contrast{
+    overflow-y: hidden!important;
+    border-radius: 0!important;
+  }
+  
+  .p-toast-close-button{
+    border-radius: 0px!important;
+    margin: 0px 15px;
+  }
+
+  .p-toast-close-button:focus-visible{
+    outline: none!important;
+  }
+}
+
+.p-paginator{
+  .p-paginator-page{
+    border-radius: 0!important;
+  }
+}

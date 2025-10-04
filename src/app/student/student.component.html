@@ -21,12 +21,12 @@
 
       <div class="flex space-x-3 items-center cursor-pointer">
         <i class="pi pi-user"></i>
-        <span>Joseph Naval</span>
+        <span>Student Tester</span>
       </div>
     </div>
 
-    <div class="flex flex-col px-[8rem] h-screen">
-      <div class="flex flex-col flex-none mt-5 ">
+    <div class="w-full px-[8rem] py-5 h-screen">
+      <div class="flex flex-col flex-none mt-5">
         <h1 class="text-3xl font-semibold overflow-hidden">
           STUDENT EVALUATION HUB
         </h1>
@@ -36,7 +36,7 @@
       </div>
 
       @if(selected_faculty === null){
-      <div class="flex flex-col space-y-5 justify-between items-center w-full">
+      <div class="mt-10">
         <div class="w-full">
           <div class="shadow-md w-[300px] bg-white flex items-center mb-3">
             <input
@@ -72,7 +72,9 @@
               </ng-template>
 
               <ng-template pTemplate="body" let-rowData>
-                <tr class="hover:!bg-slate-100 cursor-pointer">
+                <tr 
+                (click)="select_faculty(rowData)"
+                class="hover:!bg-slate-100 cursor-pointer">
                   <td>{{ rowData.name }}</td>
                   <td>{{ rowData.department }}</td>
                   <td class="w-36">
@@ -107,8 +109,17 @@
         </div>
       </div>
       }@else {
-      <div class="flex flex-col space-y-5   mt-5">
-  
+      <div class="flex flex-col space-y-5 mt-5">
+                <div class="flex items-center text-sm">
+          <div
+            (click)="back_to_faculty()"
+            class="flex items-center  py-2 cursor-pointer group"
+          >
+            <i class="pi pi-angle-left"></i>
+            <span class="group-hover:underline transition-all">Back</span>
+          </div>
+        </div>
+
         <div
             class="flex flex-col flex-none bg-white w-full p-5 border-b-2 border-[#284715] shadow-md"
           >
@@ -117,7 +128,7 @@
                 Faculty Evaluation Form SY 2025-2026
               </span>
               <span class="text-base overflow-hidden">
-                Evaluatee: Teacher's Name
+                Evaluatee: {{ teacher_name }}
               </span>
             </div>
             <div class="flex flex-col mt-3">
@@ -227,6 +238,17 @@
       </div>
 
       }
+          <div
+        (click)="handle_signout()"
+        class=" flex space-x-3 items-center w-max px-8 py-2 group hover:bg-[#d9d9d94d] transition-all cursor-pointer"
+      >
+        <i
+          class=" pi pi-sign-out -scale-x-100 text-lg"
+        ></i>
+        <div class=" flex flex-col">
+          <span class="text-sm">Sign Out</span>
+        </div>
+      </div>
     </div>
   </div>
 </main>

@@ -18,9 +18,21 @@ export class LoginComponent {
   handle_signin(username:string, password:string){
     this._api.post(`${dev_config.api_base_url}/auth`, { username, password })
     .subscribe(
-      res => {
+      (res:any) => {
         this._auth_service.sign_in(res)
-        this._navigation.navigate_to_link('admin/overview')
+        console.log(res)
+        switch(res.role){
+          case 'admin':
+            this._navigation.navigate_to_link('admin/overview')
+          break;
+          case 'student':
+            this._navigation.navigate_to_link('student')
+          break;
+          case 'faculty':
+            this._navigation.navigate_to_link('faculty-main')
+          break;
+        }
+        
       },
       err => console.log(err)
     )

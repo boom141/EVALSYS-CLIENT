@@ -1,2 +1,15 @@
 <router-outlet></router-outlet>
 
+@if(is_loading){
+<div class="absolute z-[1000]">
+  <div class="fixed inset-0 flex items-center justify-center">
+    <div
+      class="bg-white p-3 shadow-md rounded-md flex flex-col items-center justify-center fadeDown"
+    >
+      <div class="loader"></div>
+      <span class="text-sm text-muted-color">Just a moment please</span>
+    </div>
+  </div>
+</div>
+}
+<p-toast position="bottom-right" key="br" />

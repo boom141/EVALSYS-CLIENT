@@ -25,44 +25,84 @@
         <div class="w-full">
           <p-table
             [value]="pagedData"
+            dataKey="_id"
             [rows]="rows"
             [scrollable]="true"
             [scrollHeight]="'320px'"
             class="w-full max-w-screen-lg text-sm text-primary"
           >
-            <ng-template pTemplate="header">
+            <ng-template #header>
               <tr class="text-left text-xs md:text-sm">
-                <th class="p-5">Name</th>
-                <th class="p-5">Department</th>
-                <th class="p-5">Responses</th>
-                <th class="p-5">Evaluation Rating</th>
-                <th class="p-5">Feedback Rating</th>
-                <th class="p-5">Status</th>
-                <th class="p-5"></th>
+                <th class="w-[5rem] !bg-slate-300"></th>
+                <th class="p-5 !bg-slate-300">Department</th>
+                <th class="p-5 !bg-slate-300">Evaluation Rating</th>
+                <th class="p-5 !bg-slate-300">Feedback Rating</th>
+                <th class="p-5 !bg-slate-300">Responses</th>
               </tr>
             </ng-template>
 
-            <ng-template pTemplate="body" let-rowData>
-              <tr (click)="select_faculty(rowData)" class="hover:!bg-slate-100 cursor-pointer">
-                <td>{{ rowData.name }}</td>
-                <td>{{ rowData.department }}</td>
-                <td class="w-36">
-                  ({{ rowData.data.total_response }}) response
-                </td>
-                <td >
-                  {{ rowData.data.evaluation_rating }}% / 100%
-                </td>
-                <td >{{ rowData.data.feedback_rating }}% / 100%</td>
-                <td >
-                  <span
-                    class="text-sm text-green-500 bg-green-100 py-1 px-2 font-medium rounded-md text-base"
-                  >
-                    {{ rowData.status }}
-                  </span>
-                </td>
+            <ng-template #body let-rowData let-expanded="expanded">
+              <tr class="hover:!bg-slate-100 cursor-pointer">
                 <td>
-                  <div class="flex justify-center items-center">
-                    <i class="pi pi-chevron-right"></i>
+                  <p-button
+                    type="button"
+                    pRipple
+                    [pRowToggler]="rowData"
+                    [text]="true"
+                    severity="secondary"
+                    [icon]="
+                      expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'
+                    "
+                  />
+                </td>
+                <td>{{ rowData.dapartment_name }}</td>
+                <td>{{ rowData.evaluation_rating }}% / 100%</td>
+                <td>{{ rowData.feedback_rating }}% / 100%</td>
+                <td class="w-36">({{ rowData.total_response }}) response</td>
+              </tr>
+            </ng-template>
+            <ng-template #expandedrow let-rowData>
+              <tr>
+                <td colspan="5">
+                  <div class="p-5 flex flex-col space-y-5">
+                    <span class="text-xl text-[#282828]">{{ rowData.dapartment_name }} Faculty Members</span>
+                    <p-table
+                      [value]="rowData.department_data"
+                      dataKey="_id"
+                      [rows]="rows"
+                      [scrollable]="true"
+                      [scrollHeight]="'320px'"
+                      class="w-full  text-sm text-primary"
+                    >
+                      <ng-template #header>
+                        <tr class="text-left text-xs md:text-sm">
+                          <th class="p-5 !bg-slate-300">Name</th>
+                          <th class="p-5 !bg-slate-300">Evaluation Rating</th>
+                          <th class="p-5 !bg-slate-300">Feedback Rating</th>
+                          <th class="p-5 !bg-slate-300">Responses</th>
+                          <th class="p-5 !bg-slate-300"></th>
+                        </tr>
+                      </ng-template>
+  
+                      <ng-template #body let-subRowData>
+                        <tr
+                          (click)="select_faculty(subRowData)"
+                          class="hover:!bg-slate-100 cursor-pointer"
+                        >
+                          <td>{{ subRowData.name }}</td>
+                          <td>{{ subRowData.overall_data.evaluation_rating }}% / 100%</td>
+                          <td>{{ subRowData.overall_data.feedback_rating }}% / 100%</td>
+                          <td class="w-36">
+                            ({{ subRowData.overall_data.total_response }}) response
+                          </td>
+                          <td>
+                            <div class="flex justify-center items-center">
+                              <i class="pi pi-chevron-right"></i>
+                            </div>
+                          </td>
+                        </tr>
+                      </ng-template>
+                    </p-table>
                   </div>
                 </td>
               </tr>
@@ -83,12 +123,16 @@
     }@else{
     <div class="flex flex-col space-y-8 mt-5">
       <div class="flex items-center gap-3 text-sm">
-        <div (click)="back_to_faculty()" class="flex items-center px-3 py-2 cursor-pointer group">
+        <div
+          (click)="back_to_faculty()"
+          class="flex items-center px-3 py-2 cursor-pointer group"
+        >
           <i class="pi pi-angle-left"></i>
           <span class="group-hover:underline transition-all">Back</span>
-          
         </div>
-        <h1 class="text-2xl overflow-hidden">{{selected_faculty.name}}’s Overview</h1>
+        <h1 class="text-2xl overflow-hidden">
+          {{ selected_faculty_name }}’s Overview
+        </h1>
       </div>
 
       <div class="flex flex-row space-x-5 w-full">

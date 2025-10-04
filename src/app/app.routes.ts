@@ -6,17 +6,23 @@ import { AuthenticationComponent } from './authentication/authentication.compone
 import { LoginComponent } from './authentication/features/login/login.component';
 import { auth_guard } from './core/guards/auth.guard';
 import { StudentComponent } from './student/student.component';
+import { FacultyMainComponent } from './faculty-main/faculty-main.component';
 
 export const routes: Routes = [
     {
-        path: 'admin', component: AdminComponent, canActivate: [auth_guard], children: [
+        path: 'admin', component: AdminComponent, children: [
             {path: "overview", component: OverviewComponent},
             {path: "faculty", component: FacultyComponent }
         ]
     },
 
     {
-        path: 'student', component: StudentComponent
+        path: 'student', component: StudentComponent, canActivate: [auth_guard]
+    },
+
+    
+    {
+        path: 'faculty-main', component: FacultyMainComponent, canActivate: [auth_guard]
     },
 
     {

@@ -1,0 +1,260 @@
+<main
+  class="relative main-wrapper flex flex-col w-full h-screen overflow-hidden"
+>
+  <div
+    class="text-white bg-[#284715] h-[90px] w-full shadow-md flex justify-between items-center px-5 flex-none"
+  >
+    <div class="text-white flex items-center">
+      <div>
+        <img
+          class="h-[48px] w-[48px]"
+          src="../assets/evalsys_logo.svg"
+          alt=""
+        />
+      </div>
+      <div class="flex flex-col">
+        <span class="font-bold text-base">EVALSYS</span>
+        <span class="font-light text-sm text-[10px]"
+          >Universidad de Manila</span
+        >
+      </div>
+    </div>
+
+    <div class="flex space-x-3 items-center cursor-pointer">
+      <i class="pi pi-user"></i>
+      <span>Faculty Member</span>
+    </div>
+  </div>
+
+  <div class="w-full overflow-auto">
+    <div class="flex w-full flex-col px-[8rem] py-5">
+      <div class="flex flex-col mt-5">
+        <h1 class="text-3xl font-semibold overflow-hidden">
+          Faculty Evaluation Analytics
+        </h1>
+        <p class="text-sm">
+          Centralized space to manage, view, and analyze faculty evaluation
+          results.
+        </p>
+      </div>
+
+      @if(selected_form === null){
+
+      <div class="mt-10">
+        <div class="w-full">
+          <div class="shadow-md w-[300px] bg-white flex items-center mb-3">
+            <input
+              (input)="onGlobalFilterChange($event)"
+              class="px-3 py-2 outline-none text-sm w-full"
+              type="text"
+              placeholder="Search keyword"
+            />
+            <div class="px-3 py-2">
+              <i class="pi pi-search"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-full bg-white shadow-md mb-3">
+          <div class="w-full">
+            <p-table
+              [value]="pagedData"
+              [rows]="rows"
+              [scrollable]="true"
+              [scrollHeight]="'320px'"
+              class="w-full max-w-screen-lg text-sm text-primary"
+            >
+              <ng-template pTemplate="header">
+                <tr class="text-left text-xs md:text-sm">
+                  <th class="p-5">School Year</th>
+                  <th class="p-5">Total Response</th>
+                  <th class="p-5">Status</th>
+                  <th class="p-5"></th>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="body" let-rowData>
+                <tr
+                  (click)="select_forms(rowData)"
+                  [ngClass]="{ 'cursor-pointer': rowData.total_response !== 0 }"
+                  class="hover:!bg-slate-100"
+                >
+                  <td>{{ rowData.school_year }}</td>
+                  <td>
+                    ({{ rowData.evaluation_data.total_response }}) response
+                  </td>
+                  <td>
+                    <span
+                      class="text-sm text-green-500 bg-green-100 py-1 px-2 font-medium rounded-md text-base"
+                    >
+                      {{ rowData.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="flex justify-center items-center">
+                      <i class="pi pi-chevron-right"></i>
+                    </div>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+          <div class="w-full">
+            <p-paginator
+              (onPageChange)="onPageChange($event)"
+              [first]="first"
+              [rows]="rows"
+              [totalRecords]="total_records"
+              class="text-xs md:text-sm rounded-none mt-2"
+            ></p-paginator>
+          </div>
+        </div>
+      </div>
+
+      }@else{
+      <div class="flex flex-col space-y-8 mt-5">
+        <div class="flex items-center text-sm">
+          <div
+            (click)="back_to_faculty()"
+            class="flex items-center  py-2 cursor-pointer group"
+          >
+            <i class="pi pi-angle-left"></i>
+            <span class="group-hover:underline transition-all">Back</span>
+          </div>
+        </div>
+
+        <div class="flex flex-row space-x-5 w-full">
+          <p-card class="w-full flex flex-col shadow-md !rounded-none mb-3">
+            <span class="text-4xl font-bold text-primary">{{
+              infocards_data.outstanding.count
+            }}</span>
+
+            <div class="mt-2">
+              <p class="text-sm font-medium text-primary">
+                {{ infocards_data.outstanding.label }}
+              </p>
+            </div>
+          </p-card>
+          <p-card class="w-full flex flex-col shadow-md !rounded-none mb-3">
+            <span class="text-4xl font-bold text-primary">{{
+              infocards_data.agree.count
+            }}</span>
+
+            <div class="mt-2">
+              <p class="text-sm font-medium text-primary">
+                {{ infocards_data.agree.label }}
+              </p>
+            </div>
+          </p-card>
+          <p-card class="w-full flex flex-col shadow-md !rounded-none mb-3">
+            <span class="text-4xl font-bold text-primary">{{
+              infocards_data.neutral.count
+            }}</span>
+
+            <div class="mt-2">
+              <p class="text-sm font-medium text-primary">
+                {{ infocards_data.neutral.label }}
+              </p>
+            </div>
+          </p-card>
+          <p-card class="w-full flex flex-col shadow-md !rounded-none mb-3">
+            <span class="text-4xl font-bold text-primary">{{
+              infocards_data.disagree.count
+            }}</span>
+
+            <div class="mt-2">
+              <p class="text-sm font-medium text-primary">
+                {{ infocards_data.disagree.label }}
+              </p>
+            </div>
+          </p-card>
+          <p-card class="w-full flex flex-col shadow-md !rounded-none mb-3">
+            <span class="text-4xl font-bold text-primary">{{
+              infocards_data.strongly_disagree.count
+            }}</span>
+
+            <div class="mt-2">
+              <p class="text-sm font-medium text-primary">
+                {{ infocards_data.strongly_disagree.label }}
+              </p>
+            </div>
+          </p-card>
+        </div>
+        <div class="flex flex-row justify-between gap-3">
+          <div class="shadow-md w-full p-3 bg-white mb-3">
+            <h1 class="text-base">Sentiment Polarity Count</h1>
+            <div class="m-5 max-h-[300px]" id="sentiments_barchart"></div>
+          </div>
+          <div class="shadow-md w-full p-3 bg-white max-w-[500px] mb-3">
+            <h1 class="text-base">Students Participation Score</h1>
+            <div class="m-5 max-h-[300px]" id="participation_score"></div>
+          </div>
+        </div>
+        <div class="flex flex-row justify-between gap-3">
+          <div class="shadow-md w-full p-3 bg-white mb-3">
+            <h1 class="text-base font-medium">Positve Polarity Feedbacks</h1>
+            <div class="mt-5 overflow-auto overflow-x-hidden max-h-[400px]">
+              @for(data of postive_sentiments_data; track $index){
+              <div class="flex flex-col p-3 border-l-2 border-[#43900C] mt-3">
+                <p class="w-[250px] text-sm italic">"{{ data.message }}"</p>
+                <div class="flex w-full justify-between mt-5">
+                  <span class="text-sm text-slate-400">Anonymous</span>
+                  <span class="text-sm text-slate-400">{{
+                    data.timestamp
+                  }}</span>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+          <div class="shadow-md w-full p-3 bg-white mb-3">
+            <h1 class="text-base font-medium">Neutral Polarity Feedbacks</h1>
+            <div
+              class="mt-5 overflow-auto overflow-x-hidden max-h-[500px] mt-3"
+            >
+              @for(data of neutral_sentiments_data; track $index){
+              <div class="flex flex-col p-3 border-l-2 border-[#CECECE] mt-3">
+                <p class="w-[250px] text-sm italic">"{{ data.message }}"</p>
+                <div class="flex w-full justify-between mt-5">
+                  <span class="text-sm text-slate-400">Anonymous</span>
+                  <span class="text-sm text-slate-400">{{
+                    data.timestamp
+                  }}</span>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+          <div class="shadow-md w-full p-3 bg-white mb-3">
+            <h1 class="text-base font-medium">Negative Polarity Feedbacks</h1>
+            <div class="mt-5 overflow-auto overflow-x-hidden max-h-[500px]">
+              @for(data of negative_sentiments_data; track $index){
+              <div class="flex flex-col p-3 border-l-2 border-[#DD1111] mt-3">
+                <p class="w-[250px] text-sm italic">"{{ data.message }}"</p>
+                <div class="flex w-full justify-between mt-5">
+                  <span class="text-sm text-slate-400">Anonymous</span>
+                  <span class="text-sm text-slate-400">{{
+                    data.timestamp
+                  }}</span>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+    <div
+        (click)="handle_signout()"
+        class=" flex space-x-3 items-center w-max px-8 py-2 group hover:bg-[#d9d9d94d] transition-all cursor-pointer"
+      >
+        <i
+          class=" pi pi-sign-out -scale-x-100 text-lg"
+        ></i>
+        <div class=" flex flex-col">
+          <span class="text-sm">Sign Out</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

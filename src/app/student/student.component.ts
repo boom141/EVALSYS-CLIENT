@@ -10,6 +10,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { CardModule } from 'primeng/card';
 import { evaluationCriteria } from '../shared/constant';
 import { ViewChild } from '@angular/core';
+import { Navigation_Service } from '../core/services/navigation.service';
+import { Auth_Service } from '../core/services/auth.service';
 @Component({
   selector: 'app-student',
   imports: [
@@ -30,18 +32,20 @@ export class StudentComponent {
   public total_records!: number;
   public filtered_data: any[] = [];
   public source_data!: any[];
-  public selected_faculty: any = 1;
+  public selected_faculty: any = null;
   public form_data: any = null;
+  public teacher_name!: string
   public filters: { [key: string]: string } = {};
 
   @ViewChild('textarea') feedback!: ElementRef<HTMLTextAreaElement>
 
 
   private _api = inject(HttpClient);  
+  private _navigation = inject(Navigation_Service)
+  private _auth_service = inject(Auth_Service)
 
   ngOnInit(): void {
-    this.form_data = evaluationCriteria
-    
+    this.form_data = evaluationCriteria[0].data
   }
 
   ngAfterViewInit() {
@@ -75,6 +79,15 @@ export class StudentComponent {
      this.form_data[category_indx].questions[question_indx].score = score
   }
 
+    select_faculty(row_data: any) {
+      this.selected_faculty = row_data
+      this.teacher_name = row_data.name
+    }
+
+
+  back_to_faculty(){
+    this.selected_faculty = null
+  }
   getDataKeys() {
     return Object.keys(this.source_data[0]);
   }
@@ -155,4 +168,8 @@ export class StudentComponent {
     });
   }
 
+      handle_signout(){
+      this._auth_service.sign_out()
+      this._navigation.navigate_to_link()
+    }
 }
