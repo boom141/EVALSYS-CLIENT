@@ -20,9 +20,10 @@ export class AdminComponent {
       return this._navigation.get_current_link()
     }
 
-    get current_username(){
-      return this._auth_service.getUser().name
+    get current_user(){
+      return this._auth_service.getUser()
     }
+
 
     navigate_link(link:string){
       this._navigation.navigate_to_link(link)

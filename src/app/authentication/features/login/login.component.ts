@@ -29,7 +29,7 @@ export class LoginComponent {
             this._navigation.navigate_to_link('student')
           break;
           case 'faculty':
-            this._navigation.navigate_to_link('faculty-main')
+            this._navigation.navigate_to_link('admin/departments')
           break;
         }
         

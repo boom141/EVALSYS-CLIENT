@@ -1,0 +1,62 @@
+@if(report_data !== null){
+    <div class="main-wrapper border-2 w-full h-screen p-5" #template>
+      <div class="flex flex-col justify-center items-center">
+        <img
+          class="w-[80px] h-[80px]"
+          src="../../../../assets/evalsys_logo.svg"
+          alt=""
+        />
+        <h1 class="font-semibold py-1">UNIVERSIDAD DE MANILA</h1>
+      </div>
+      <table class="w-full border border-collapse mt-5">
+        <thead>
+          <tr>
+            <td colspan="5">
+              <div class="py-5 px-5 text-left flex gap-3">
+                <h3 class="font-semibold py-3"> Department:</h3>
+                <span class="py-3">
+                    {{ report_data.department_name }}
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <th class="p-3 border text-left">Faculty Member Name</th>
+            <th class="p-3 border text-left">Evaluation Rating</th>
+            <th class="p-3 border text-left">Feedback Rating</th>
+            <th class="p-3 border text-left">Responses</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for(item of report_data.department_data; track $index){
+          <tr>
+            <td class="p-3 border">
+              {{ item.name }}
+            </td>
+            <td class="p-3 border">
+              {{ item.overall_data.evaluation_rating }}% / 100% 
+            </td>
+            <td class="p-3 border">
+              {{ item.overall_data.feedback_rating }}% / 100% 
+            </td>
+            <td class="p-3 border">
+              ({{ item.overall_data.total_response }}) Responses
+            </td>
+          </tr>
+          }
+          <tr>
+            <td class="p-3 border">Total</td>
+            <td class="p-3 border">
+              {{ report_data.evaluation_rating }}% / 100% 
+            </td>
+            <td class="p-3 border">
+              {{ report_data.feedback_rating }}% / 100% 
+            </td>
+            <td class="p-3 border">
+              ({{ report_data.total_response }}) Responses
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+}

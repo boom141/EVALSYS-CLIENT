@@ -5,13 +5,15 @@ import { CommonModule } from '@angular/common';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { CardModule } from 'primeng/card';
 import { chart } from 'highcharts';
 import { dev_config } from '../../../environments/dev.env';
 import { ToastService } from '../../../core/services/toast.service';
 import { LoadingService } from '../../../core/services/loading.service';
-
+import { TooltipModule } from 'primeng/tooltip';
+import { ReportTemplateService } from '../../../core/services/report_template.service';
+import { Auth_Service } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-faculty',
   imports: [
@@ -22,19 +24,21 @@ import { LoadingService } from '../../../core/services/loading.service';
     FormsModule,
     InputTextModule,
     CardModule,
+    TooltipModule
   ],
   templateUrl: './faculty.component.html',
   styleUrl: './faculty.component.scss',
 })
 export class FacultyComponent {
-  public first: number = 0; 
-  public rows: number = 5; 
+  public first: number = 0;
+  public rows: number = 5;
   public total_records!: number;
   public filtered_data: any[] = [];
   public source_data!: any[];
   public selected_faculty: any = null;
-  public selected_faculty_name!: string 
+  public selected_section: any = null;
 
+  public leaderboard_data: any;
   public barchart_data: any;
   public donut_data: any;
   public infocards_data: any;
@@ -42,10 +46,13 @@ export class FacultyComponent {
   public neutral_sentiments_data: any;
   public negative_sentiments_data: any;
   public filters: { [key: string]: string } = {};
-  
+
   private _api = inject(HttpClient);
   private _toast_service = inject(ToastService);
   private _loadingService = inject(LoadingService);
+  private _report_template_service = inject(ReportTemplateService)
+  private _auth_service = inject(Auth_Service)
+  
 
   ngAfterViewInit() {
     this.fetch_data();
@@ -53,37 +60,46 @@ export class FacultyComponent {
 
   fetch_data() {
     this._loadingService.show();
-    this._api.get(`${dev_config.api_base_url}/department` ,{
-            headers:{
-        "ngrok-skip-browser-warning": "true"
-      }
-    }).subscribe(
-      
-      (res: any) => {
-      this.source_data = res;
-      this.total_records = this.source_data.length;
-      this.filtered_data = [...this.source_data];
-      this._loadingService.hide();
-      this._toast_service.show({
-        severity: 'success',
-        summary: 'Departments',
-        detail:
-          'Data Loaded Successfully',
-      });
+    const department_name = this._auth_service.getUser().department
+    const params = new HttpParams().set(
+      'department_name',
+      department_name
+    );
 
-    },
-    err =>{
-      this._loadingService.hide();
-      this._toast_service.show({
-        severity: 'error',
-        summary: 'Departments',
-        detail:
-          'Data Loaded Unsuccessfully',
-      });
-    }
-  );
+    this._api
+      .get(`${dev_config.api_base_url}/department`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+        },
+        params
+      })
+
+      .subscribe(
+        (res: any) => {
+          this.source_data = res;
+          this.total_records = this.source_data.length;
+          this.filtered_data = [...this.source_data];
+          this._loadingService.hide();
+          this._toast_service.show({
+            severity: 'success',
+            summary: 'Departments',
+            detail: 'Data Loaded Successfully',
+          });
+        },
+        (err) => {
+          this._loadingService.hide();
+          this._toast_service.show({
+            severity: 'error',
+            summary: 'Departments',
+            detail: 'Data Loaded Unsuccessfully',
+          });
+        }
+      );
   }
 
+  export_data(row_data:any){
+    this._report_template_service.set_report(row_data)
+  }
 
   getDataKeys() {
     return Object.keys(this.source_data[0]);
@@ -139,17 +155,11 @@ export class FacultyComponent {
   }
 
   select_faculty(row_data: any) {
-    this.selected_faculty_name = row_data.name
-    this.selected_faculty = row_data.overall_data;
-    this.infocards_data = this.selected_faculty.info_cards;
-    this.barchart_data = this.selected_faculty.sentiment_data;
-    this.donut_data = this.selected_faculty.participation_score;
-    this.postive_sentiments_data =
-      this.selected_faculty.sentiment_data.positive.feedbacks;
-    this.neutral_sentiments_data =
-      this.selected_faculty.sentiment_data.neutral.feedbacks;
-    this.negative_sentiments_data =
-      this.selected_faculty.sentiment_data.negative.feedbacks;
+    this.selected_faculty = row_data;
+    this.leaderboard_data = this.selected_faculty.section_data;
+    this.infocards_data = this.selected_faculty.overall_data.info_cards;
+    this.barchart_data = this.selected_faculty.overall_data.sentiment_data;
+    this.donut_data = this.selected_faculty.overall_data.participation_score;
 
     setTimeout(() => {
       this.render_bar_chart();
@@ -157,10 +167,19 @@ export class FacultyComponent {
     }, 100);
   }
 
-  back_to_faculty(){
-    this.selected_faculty = null
+  select_section(row_data: any) {
+    this.selected_section = row_data;
+    this.postive_sentiments_data =
+      this.selected_section.data.sentiment_data.positive.feedbacks;
+    this.neutral_sentiments_data =
+      this.selected_section.data.sentiment_data.neutral.feedbacks;
+    this.negative_sentiments_data =
+      this.selected_section.data.sentiment_data.negative.feedbacks;
   }
 
+  back_to_faculty() {
+    this.selected_faculty = null;
+  }
 
   render_bar_chart() {
     this.barchart_data = [
@@ -172,40 +191,40 @@ export class FacultyComponent {
           { y: this.barchart_data.negative.count, color: '#D21313' },
         ],
       },
-    ]
+    ];
 
-      chart('sentiments_barchart', {
-        chart: {
-          type: 'column',
-        },
+    chart('sentiments_barchart', {
+      chart: {
+        type: 'column',
+      },
 
+      title: {
+        text: '',
+      },
+
+      legend: {
+        enabled: false,
+      },
+
+      xAxis: {
+        categories: ['Positive', 'Neutral', 'Negative'],
+        crosshair: true,
+      },
+      yAxis: {
+        min: 0,
         title: {
           text: '',
         },
-
-        legend: {
-          enabled: false,
+      },
+      plotOptions: {
+        column: {
+          pointPadding: 0.2,
+          borderWidth: 0,
+          borderRadius: 0,
         },
-
-        xAxis: {
-          categories: ['Positive', 'Neutral', 'Negative'],
-          crosshair: true,
-        },
-        yAxis: {
-          min: 0,
-          title: {
-            text: '',
-          },
-        },
-        plotOptions: {
-          column: {
-            pointPadding: 0.2,
-            borderWidth: 0,
-            borderRadius: 0,
-          },
-        },
-        series: this.barchart_data,
-      });
+      },
+      series: this.barchart_data,
+    });
   }
 
   render_participation_score() {

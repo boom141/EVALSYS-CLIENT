@@ -12,7 +12,7 @@ export const routes: Routes = [
     {
         path: 'admin', component: AdminComponent, children: [
             {path: "overview", component: OverviewComponent},
-            {path: "faculty", component: FacultyComponent }
+            {path: "departments", component: FacultyComponent }
         ]
     },
 

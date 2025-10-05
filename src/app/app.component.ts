@@ -4,10 +4,11 @@ import { MessageService, ToastMessageOptions } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ToastService } from './core/services/toast.service';
 import { LoadingService } from './core/services/loading.service';
+import { ReportTemplateComponent } from "./shared/components/report-template/report-template.component";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ToastModule],
+  imports: [RouterOutlet, ToastModule, ReportTemplateComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   providers: [MessageService]
