@@ -12,6 +12,10 @@ import { evaluationCriteria } from '../shared/constant';
 import { ViewChild } from '@angular/core';
 import { Navigation_Service } from '../core/services/navigation.service';
 import { Auth_Service } from '../core/services/auth.service';
+import { ToastService } from '../core/services/toast.service';
+import { LoadingService } from '../core/services/loading.service';
+import { DialogModule } from 'primeng/dialog';
+import { Message } from 'primeng/message';
 @Component({
   selector: 'app-student',
   imports: [
@@ -22,6 +26,8 @@ import { Auth_Service } from '../core/services/auth.service';
     FormsModule,
     InputTextModule,
     CardModule,
+    DialogModule,
+    Message,
   ],
   templateUrl: './student.component.html',
   styleUrl: './student.component.scss',
@@ -34,18 +40,22 @@ export class StudentComponent {
   public source_data!: any[];
   public selected_faculty: any = null;
   public form_data: any = null;
-  public teacher_name!: string
+  public teacher_name!: string;
   public filters: { [key: string]: string } = {};
 
-  @ViewChild('textarea') feedback!: ElementRef<HTMLTextAreaElement>
+  public goback_dialog_visibility: boolean = false;
+  public submit_dialog_visibility: boolean = false;
 
+  @ViewChild('textarea') feedback!: ElementRef<HTMLTextAreaElement>;
 
-  private _api = inject(HttpClient);  
-  private _navigation = inject(Navigation_Service)
-  private _auth_service = inject(Auth_Service)
+  private _api = inject(HttpClient);
+  private _navigation = inject(Navigation_Service);
+  private _auth_service = inject(Auth_Service);
+  private _toast_service = inject(ToastService);
+  private _loadingService = inject(LoadingService);
 
   ngOnInit(): void {
-    this.form_data = evaluationCriteria[0].data
+    this.form_data = evaluationCriteria[0].data;
   }
 
   ngAfterViewInit() {
@@ -55,12 +65,22 @@ export class StudentComponent {
     return this.form_data;
   }
 
+  handle_goback_dialog() {
+    this.goback_dialog_visibility = false;
+    this.back_to_faculty();
+  }
+
+  handle_submit_dialog() {
+    this.submit_dialog_visibility = false;
+    this.submit()
+  }
+
   fetch_data() {
     const params = new HttpParams().set(
       'student_id',
-      '68d8f52a4475fd922013517c'
+      this._auth_service.getUser()._id
     );
-
+    this._loadingService.show();
     this._api
       .get(`${dev_config.api_base_url}/student`, {
         headers: {
@@ -68,25 +88,44 @@ export class StudentComponent {
         },
         params,
       })
-      .subscribe((res: any) => {
-        this.source_data = res;
-        this.total_records = this.source_data.length;
-        this.filtered_data = [...this.source_data];
-      });
+      .subscribe(
+        (res: any) => {
+          this.source_data = res;
+          this.total_records = this.source_data.length;
+          this.filtered_data = [...this.source_data];
+          this._loadingService.hide();
+          this._toast_service.show({
+            severity: 'success',
+            summary: 'Student Evaluation Hub',
+            detail: 'Data Loaded Successfully',
+          });
+        },
+        (err) => {
+          this._loadingService.hide();
+          this._toast_service.show({
+            severity: 'Error',
+            summary: 'Student Evaluation Hub',
+            detail: 'Data Loaded Unsuccessfully',
+          });
+        }
+      );
   }
 
-  modify_form_data(category_indx:number, question_indx:number, score:number){
-     this.form_data[category_indx].questions[question_indx].score = score
+  modify_form_data(
+    category_indx: number,
+    question_indx: number,
+    score: number
+  ) {
+    this.form_data[category_indx].questions[question_indx].score = score;
   }
 
-    select_faculty(row_data: any) {
-      this.selected_faculty = row_data
-      this.teacher_name = row_data.name
-    }
+  select_faculty(row_data: any) {
+    this.selected_faculty = row_data;
+    this.teacher_name = row_data.name;
+  }
 
-
-  back_to_faculty(){
-    this.selected_faculty = null
+  back_to_faculty() {
+    this.selected_faculty = null;
   }
   getDataKeys() {
     return Object.keys(this.source_data[0]);
@@ -141,35 +180,54 @@ export class StudentComponent {
     });
   }
 
-
-  submit(){
-    const questionaire:any = {}
-    this.form_data.forEach((category:any, indx:number) => {
-      questionaire[`category_${indx + 1}`] = category.questions.map((item:any) => ({
-        score: item.score
-      }))
+  submit() {
+    const questionaire: any = {};
+    this.form_data.forEach((category: any, indx: number) => {
+      questionaire[`category_${indx + 1}`] = category.questions.map(
+        (item: any) => ({
+          score: item.score,
+        })
+      );
     });
 
     const evaluation_data = {
-      student_id: '68d8f52a4475fd922013517c',
-      teacher_id: '68ca7b9e362b57b8d9d0a74f',
+      student_id: this._auth_service.getUser()._id,
+      teacher_id: this.selected_faculty._id,
       questionaire,
       feedback: {
         message: this.feedback.nativeElement.value,
-    }
-    }
-
-    this._api.post(`${dev_config.api_base_url}/evaluation`, evaluation_data ,{
-            headers:{
-        "ngrok-skip-browser-warning": "true"
-      }
-    }).subscribe((res: any) => {
-      console.log(res)
-    });
+      },
+    };
+    this._loadingService.show();
+    this._api
+      .post(`${dev_config.api_base_url}/evaluation`, evaluation_data, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+        },
+      })
+      .subscribe(
+        (res: any) => {
+          this._loadingService.hide();
+          this._toast_service.show({
+            severity: 'success',
+            summary: 'Student Evaluation Hub',
+            detail: 'Form Submitted Successfully',
+          });
+          this.back_to_faculty()
+        },
+        (err) => {
+          this._loadingService.hide();
+          this._toast_service.show({
+            severity: 'Error',
+            summary: 'Student Evaluation Hub',
+            detail: 'Form Submitted Unsuccessfully',
+          });
+        }
+      );
   }
 
-      handle_signout(){
-      this._auth_service.sign_out()
-      this._navigation.navigate_to_link()
-    }
+  handle_signout() {
+    this._auth_service.sign_out();
+    this._navigation.navigate_to_link();
+  }
 }
