@@ -55,6 +55,7 @@ export class StudentComponent {
   private _loadingService = inject(LoadingService);
 
   ngOnInit(): void {
+    this._auth_service.set_forms()
     this.form_data = evaluationCriteria[0].data;
   }
 
@@ -213,6 +214,7 @@ export class StudentComponent {
             summary: 'Student Evaluation Hub',
             detail: 'Form Submitted Successfully',
           });
+          this._auth_service.update_forms(this.selected_faculty._id)
           this.back_to_faculty()
         },
         (err) => {

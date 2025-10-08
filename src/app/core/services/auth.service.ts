@@ -10,14 +10,24 @@ export class Auth_Service{
         localStorage.setItem('sessionUser', JSON.stringify(data))
     }
 
-    // updateUser(data: any){
-    //     let userData = this.getUser()
-    //     this.setUser({
-    //         ...userData,
-    //         ...data
-    //     })
-    // }
+    set_forms(){
+        let session_forms = this.get_forms()
+        if(session_forms){
+            session_forms = {...session_forms}
+        }else{
+            session_forms = {}
+        }
+       sessionStorage.setItem('sessionForms', JSON.stringify(session_forms))
+    }
 
+    get_forms(){
+        return JSON.parse(sessionStorage.getItem('userforms') as string)   
+    }
+
+    update_forms(data:string){
+        const session_forms = this.get_forms()
+        sessionStorage.setItem('sessionForms', JSON.stringify({...session_forms, [data]: true}))
+    }
 
     getUser(){
         return JSON.parse(localStorage.getItem('sessionUser') as string)   
