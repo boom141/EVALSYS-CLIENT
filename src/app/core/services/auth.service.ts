@@ -12,21 +12,20 @@ export class Auth_Service{
 
     set_forms(){
         let session_forms = this.get_forms()
-        if(session_forms){
-            session_forms = {...session_forms}
-        }else{
-            session_forms = {}
+        if(session_forms === null){
+            localStorage.setItem('sessionForms', JSON.stringify({}))
         }
-       sessionStorage.setItem('sessionForms', JSON.stringify(session_forms))
     }
 
     get_forms(){
-        return JSON.parse(sessionStorage.getItem('userforms') as string)   
+        return JSON.parse(localStorage.getItem('sessionForms') as string)   
     }
 
     update_forms(data:string){
         const session_forms = this.get_forms()
-        sessionStorage.setItem('sessionForms', JSON.stringify({...session_forms, [data]: true}))
+        console.log(session_forms)
+        session_forms[data] = true
+        localStorage.setItem('sessionForms', JSON.stringify(session_forms))
     }
 
     getUser(){
@@ -35,7 +34,7 @@ export class Auth_Service{
 
     clearSession(){
         localStorage.removeItem('sessionUser')
-
+        localStorage.removeItem('sessionForms')
     }
 
     isAuthenticated(){

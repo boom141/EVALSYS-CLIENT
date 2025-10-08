@@ -72,9 +72,13 @@
               </ng-template>
 
               <ng-template pTemplate="body" let-rowData>
-                <tr 
-                (click)="select_faculty(rowData)"
-                class="hover:!bg-slate-100 cursor-pointer">
+                <tr
+                  (click)="select_faculty(rowData)"
+                  [ngClass]="{
+                    'pointer-events-none': is_complete(rowData._id)
+                  }"
+                  class="hover:!bg-slate-100 cursor-pointer"
+                >
                   <td>{{ rowData.name }}</td>
                   <td>{{ rowData.department }}</td>
                   <td class="w-36">
@@ -82,11 +86,20 @@
                   </td>
                   <td>{{ rowData.subject }}</td>
                   <td>
+                    @if(is_complete(rowData._id)){
+                    <span
+                      class="text-sm text-green-500 bg-green-100 py-1 px-2 font-medium rounded-md text-base"
+                    >
+                      Completed
+                    </span>
+                    }@else{
+
                     <span
                       class="text-sm text-red-500 bg-red-100 py-1 px-2 font-medium rounded-md text-base"
                     >
                       Pending
                     </span>
+                    }
                   </td>
                   <td>
                     <div class="flex justify-center items-center">
@@ -110,164 +123,221 @@
       </div>
       }@else {
       <div class="flex flex-col space-y-5 mt-5">
-                <div class="flex items-center text-sm">
-          <div
-            
-            class="flex items-center  py-2 cursor-pointer group"
-          >
+        <div
+          (click)="goback_dialog_visibility = true"
+          class="flex items-center text-sm"
+        >
+          <div class="flex items-center py-2 cursor-pointer group">
             <i class="pi pi-angle-left"></i>
             <span class="group-hover:underline transition-all">Back</span>
           </div>
         </div>
 
         <div
-            class="flex flex-col flex-none bg-white w-full p-5 border-b-2 border-[#284715] shadow-md"
+          class="flex flex-col flex-none bg-white w-full p-5 border-b-2 border-[#284715] shadow-md"
+        >
+          <div class="flex flex-col">
+            <span class="text-xl font-semibold">
+              Faculty Evaluation Form SY 2025-2026
+            </span>
+            <span class="text-base overflow-hidden">
+              Evaluatee: {{ teacher_name }}
+            </span>
+          </div>
+          <div class="flex flex-col mt-3">
+            <span class="font-semibold"
+              >Understanding the 5-Point Evaluation Matrix</span
+            >
+
+            <p>1: Strongly Disagree</p>
+            <p>2: Disagree</p>
+            <p>3: Neutral</p>
+            <p>4: Agree</p>
+            <p>5: Outstanding</p>
+          </div>
+        </div>
+
+        @for(data of fetch_evaluation_questions; track $index; let category_indx
+        = $index){
+        <div
+          class="font-semibold flex flex-none space-x-3 items-center bg-[#284715] w-full p-5 text-white shadow-md"
+        >
+          <img
+            class="w-[16px] h-[16px]"
+            src="https://img.icons8.com/?size=100&id=646&format=png&color=ffffff"
+            alt=""
+          />
+          <span>{{ data.category }}</span>
+        </div>
+        @for(question of data.questions; track $index; let question_indx =
+        $index){
+        <div
+          class="flex flex-none flex-col space-y-5 bg-white w-full p-5 border-b-2 border-[#284715] shadow-md"
+        >
+          <span> {{ $index + 1 }}. {{ question.text }}</span>
+
+          <div class="flex space-x-3 mb-5">
+            <div
+              (click)="modify_form_data(category_indx, question_indx, 1)"
+              [ngClass]="{
+                'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':
+                  question.score == 1
+              }"
+              class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
+            >
+              1
+            </div>
+            <div
+              (click)="modify_form_data(category_indx, question_indx, 2)"
+              [ngClass]="{
+                'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':
+                  question.score == 2
+              }"
+              class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
+            >
+              2
+            </div>
+            <div
+              (click)="modify_form_data(category_indx, question_indx, 3)"
+              [ngClass]="{
+                'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':
+                  question.score == 3
+              }"
+              class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
+            >
+              3
+            </div>
+            <div
+              (click)="modify_form_data(category_indx, question_indx, 4)"
+              [ngClass]="{
+                'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':
+                  question.score == 4
+              }"
+              class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
+            >
+              4
+            </div>
+            <div
+              (click)="modify_form_data(category_indx, question_indx, 5)"
+              [ngClass]="{
+                'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':
+                  question.score == 5
+              }"
+              class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
+            >
+              5
+            </div>
+          </div>
+        </div>
+        } }
+
+        <div
+          class="font-semibold flex flex-none space-x-3 items-center bg-[#284715] w-full p-5 text-white shadow-md"
+        >
+          <img
+            class="w-[16px] h-[16px]"
+            src="https://img.icons8.com/?size=100&id=646&format=png&color=ffffff"
+            alt=""
+          />
+          <span
+            >Your feedback matters! Feel free to share any suggestions,
+            thoughts, or concerns about this faculty member below.</span
           >
-            <div class="flex flex-col">
-              <span class="text-xl font-semibold ">
-                Faculty Evaluation Form SY 2025-2026
-              </span>
-              <span class="text-base overflow-hidden">
-                Evaluatee: {{ teacher_name }}
-              </span>
-            </div>
-            <div class="flex flex-col mt-3">
-    
-            <span class="font-semibold">Understanding the 5-Point Evaluation Matrix</span>
-                    
-            <p >1: Strongly Disagree </p>
-            <p >2: Disagree </p>
-            <p >3: Neutral </p>
-            <p >4: Agree </p>
-            <p >5: Outstanding </p>
-        
-            </div>
-          </div>
+        </div>
+        <div
+          class="flex flex-none flex-col space-y-5 bg-white w-full p-5 border-b-2 border-[#284715] shadow-md"
+        >
+          <textarea
+            class="text-black outline-none"
+            cols="10"
+            placeholder="Share your thoughts with us!"
+            #textarea
+          ></textarea>
+        </div>
 
-          @for(data of fetch_evaluation_questions; track $index; let category_indx = $index){
-              <div
-                class="font-semibold flex flex-none space-x-3 items-center bg-[#284715] w-full p-5 text-white shadow-md"
-              >
-                <img
-                  class="w-[16px] h-[16px]"
-                  src="https://img.icons8.com/?size=100&id=646&format=png&color=ffffff"
-                  alt=""
-                />
-                <span>{{data.category}}</span>
-              </div>
-               @for(question of data.questions; track $index; let question_indx = $index){
-                   <div
-                     class="flex flex-none flex-col space-y-5 bg-white w-full p-5 border-b-2 border-[#284715] shadow-md"
-                   >
-                     <span>
-                      {{$index + 1}}. {{question.text}}</span
-                     >
-         
-                     <div class="flex space-x-3 mb-5">
-                       <div
-                         (click)="modify_form_data(category_indx, question_indx, 1)"
-                         [ngClass]="{'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':question.score == 1}"
-                         class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
-                       >
-                         1
-                       </div>
-                       <div
-                         (click)="modify_form_data(category_indx, question_indx, 2)"
-                           [ngClass]="{'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':question.score == 2}"
-                         class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
-                       >
-                         2
-                       </div>
-                       <div
-                        (click)="modify_form_data(category_indx, question_indx, 3)"
-                          [ngClass]="{'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':question.score == 3}"
-                         class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
-                       >
-                         3
-                       </div>
-                       <div
-                        (click)="modify_form_data(category_indx, question_indx, 4)"
-                          [ngClass]="{'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':question.score == 4}"
-                         class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
-                       >
-                         4
-                       </div>
-                       <div
-                        (click)="modify_form_data(category_indx, question_indx, 5)"
-                          [ngClass]="{'border border-[#284715] bg-[#284715] text-white hover:!bg-[#284715]':question.score == 5}"
-                         class="text-[25px] py-1 text-center border border-[#CECECE] w-[50px] h-[50px] hover:bg-slate-100 transition-all cursor-pointer"
-                       >
-                         5
-                       </div>
-                     </div>
-                   </div>
-               }
-          }
-
-             <div
-                class="font-semibold flex flex-none space-x-3 items-center bg-[#284715] w-full p-5 text-white shadow-md"
-              >
-                <img
-                  class="w-[16px] h-[16px]"
-                  src="https://img.icons8.com/?size=100&id=646&format=png&color=ffffff"
-                  alt=""
-                />
-                <span>Your feedback matters! Feel free to share any suggestions, thoughts, or concerns about this faculty member below.</span>
-              </div>
-                <div
-                     class="flex flex-none flex-col space-y-5 bg-white w-full p-5 border-b-2 border-[#284715] shadow-md"
-                   >
-                <textarea class="text-black outline-none" cols="10"  placeholder="Share your thoughts with us!" #textarea></textarea>
-                </div>
-
-          <div class="flex flex-none space-x-3 mb-5">
-            <div
+        <div class="flex flex-none space-x-3 mb-5">
+          <div
             (click)="goback_dialog_visibility = true"
-              class="flex cursor-pointer bg-white w-full shadow-md p-3 justify-center items-center"
-            >
-              Cancel
-            </div>
-            <div
-            (click)="submit_dialog_visibility = true"
-              class="flex cursor-pointer bg-[#284715] text-white w-full shadow-md p-3 justify-center items-center"
-            >
-              Submit
-            </div>
+            class="flex cursor-pointer bg-white w-full shadow-md p-3 justify-center items-center"
+          >
+            Cancel
           </div>
-
-
+          <div
+            (click)="submit_dialog_visibility = true"
+            class="flex cursor-pointer bg-[#284715] text-white w-full shadow-md p-3 justify-center items-center"
+          >
+            Submit
+          </div>
+        </div>
       </div>
 
-      }
-          <div
+      } @if(selected_faculty === null){
+      <div
         (click)="handle_signout()"
-        class=" flex space-x-3 items-center w-max px-8 py-2 group hover:bg-[#d9d9d94d] transition-all cursor-pointer"
+        class="flex space-x-3 items-center w-max px-8 py-2 group hover:bg-[#d9d9d94d] transition-all cursor-pointer"
       >
-        <i
-          class=" pi pi-sign-out -scale-x-100 text-lg"
-        ></i>
-        <div class=" flex flex-col">
+        <i class="pi pi-sign-out -scale-x-100 text-lg"></i>
+        <div class="flex flex-col">
           <span class="text-sm">Sign Out</span>
         </div>
       </div>
+      }
     </div>
   </div>
 </main>
 
-<p-dialog header="Submit Form" [modal]="true" [(visible)]="submit_dialog_visibility" [style]="{ width: '25rem' }">
-    <p-message severity="warn">You have unsaved changes. Are you sure you want to leave this page?</p-message>
+<p-dialog
+  header="Submit Form"
+  [modal]="true"
+  [(visible)]="submit_dialog_visibility"
+  [style]="{ width: '25rem' }"
+>
+  <div
+    class="w-full bg-yellow-100 text-yellow-700 border border-yellow-700 p-3"
+  >
+    You have unsaved changes. Are you sure you want to leave this page?
+  </div>
 
-    <div class="flex justify-end gap-2 mt-5">
-        <p-button label="Cancel" severity="secondary" (click)="submit_dialog_visibility = false" />
-        <p-button (onClick)="handle_submit_dialog()" label="Submit"/>
-    </div>
+  <div class="flex justify-end gap-2 mt-5">
+    <p-button
+      label="Cancel"
+      severity="secondary"
+      (click)="submit_dialog_visibility = false"
+    />
+    <p-button (onClick)="handle_submit_dialog()" label="Submit" />
+  </div>
 </p-dialog>
 
-<p-dialog header="You're about to leave" [modal]="true" [(visible)]="goback_dialog_visibility" [style]="{ width: '25rem' }">
-    <p-message severity="warn">Are you sure you want to leave this page?</p-message>
+<p-dialog
+  header="You're about to leave"
+  [modal]="true"
+  [(visible)]="goback_dialog_visibility"
+  [style]="{ width: '25rem' }"
+>
+  <div
+    class="w-full bg-yellow-100 text-yellow-700 border border-yellow-700 p-3"
+  >
+    Are you sure you want to leave this page?
+  </div>
 
-    <div class="flex justify-end gap-2 mt-5">
-        <p-button label="Cancel" severity="secondary" (click)="goback_dialog_visibility = false" />
-        <p-button (onClick)="handle_goback_dialog()" label="Yes"/>
-    </div>
+  <div class="flex justify-end gap-2 mt-5">
+    <p-button
+      label="Cancel"
+      severity="secondary"
+      (click)="goback_dialog_visibility = false"
+    />
+    <p-button (onClick)="handle_goback_dialog()" label="Yes" />
+  </div>
+</p-dialog>
+
+<p-dialog
+  header="Incomplete Form"
+  [modal]="true"
+  [(visible)]="form_validation_dialog"
+  [style]="{ width: '25rem' }"
+  class="!rounded-none"
+>
+  <div class="w-full bg-red-100 text-red-700 border border-red-700 p-3">
+    Please answer all questions before submitting.
+  </div>
 </p-dialog>

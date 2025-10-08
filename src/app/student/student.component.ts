@@ -16,6 +16,7 @@ import { ToastService } from '../core/services/toast.service';
 import { LoadingService } from '../core/services/loading.service';
 import { DialogModule } from 'primeng/dialog';
 import { Message } from 'primeng/message';
+import { find } from 'highcharts';
 @Component({
   selector: 'app-student',
   imports: [
@@ -45,6 +46,7 @@ export class StudentComponent {
 
   public goback_dialog_visibility: boolean = false;
   public submit_dialog_visibility: boolean = false;
+  public form_validation_dialog: boolean = false
 
   @ViewChild('textarea') feedback!: ElementRef<HTMLTextAreaElement>;
 
@@ -53,6 +55,7 @@ export class StudentComponent {
   private _auth_service = inject(Auth_Service);
   private _toast_service = inject(ToastService);
   private _loadingService = inject(LoadingService);
+  private forms!: any
 
   ngOnInit(): void {
     this._auth_service.set_forms()
@@ -60,10 +63,15 @@ export class StudentComponent {
   }
 
   ngAfterViewInit() {
+    this.forms = this._auth_service.get_forms()
     this.fetch_data();
   }
   get fetch_evaluation_questions() {
     return this.form_data;
+  }
+
+  get current_user(){
+    return this._auth_service.getUser()
   }
 
   handle_goback_dialog() {
@@ -181,55 +189,84 @@ export class StudentComponent {
     });
   }
 
-  submit() {
-    const questionaire: any = {};
-    this.form_data.forEach((category: any, indx: number) => {
-      questionaire[`category_${indx + 1}`] = category.questions.map(
-        (item: any) => ({
-          score: item.score,
-        })
-      );
-    });
-
-    const evaluation_data = {
-      student_id: this._auth_service.getUser()._id,
-      teacher_id: this.selected_faculty._id,
-      questionaire,
-      feedback: {
-        message: this.feedback.nativeElement.value,
-      },
-    };
-    this._loadingService.show();
-    this._api
-      .post(`${dev_config.api_base_url}/evaluation`, evaluation_data, {
-        headers: {
-          'ngrok-skip-browser-warning': 'true',
-        },
-      })
-      .subscribe(
-        (res: any) => {
-          this._loadingService.hide();
-          this._toast_service.show({
-            severity: 'success',
-            summary: 'Student Evaluation Hub',
-            detail: 'Form Submitted Successfully',
-          });
-          this._auth_service.update_forms(this.selected_faculty._id)
-          this.back_to_faculty()
-        },
-        (err) => {
-          this._loadingService.hide();
-          this._toast_service.show({
-            severity: 'Error',
-            summary: 'Student Evaluation Hub',
-            detail: 'Form Submitted Unsuccessfully',
-          });
-        }
-      );
+  findFirstNullScoreIndex() {
+  for (let parentIndex = 0; parentIndex < this.form_data.length; parentIndex++) {
+    const questions = this.form_data[parentIndex].questions;
+    for (let childIndex = 0; childIndex < questions.length; childIndex++) {
+      if (questions[childIndex].score === null) {
+        return { parentIndex, childIndex };
+      }
+    }
   }
+
+  return null;
+}
+
+
+  submit() {
+
+    if(this.findFirstNullScoreIndex() === null){
+      const questionaire: any = {};
+      this.form_data.forEach((category: any, indx: number) => {
+        questionaire[`category_${indx + 1}`] = category.questions.map(
+          (item: any) => ({
+            score: item.score,
+          })
+        );
+      });
+  
+      const evaluation_data = {
+        student_id: this._auth_service.getUser()._id,
+        teacher_id: this.selected_faculty._id,
+        questionaire,
+        feedback: {
+          message: this.feedback.nativeElement.value,
+        },
+      };
+      this._loadingService.show();
+      this._api
+        .post(`${dev_config.api_base_url}/evaluation`, evaluation_data, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+          },
+        })
+        .subscribe(
+          (res: any) => {
+            this._loadingService.hide();
+            this._toast_service.show({
+              severity: 'success',
+              summary: 'Student Evaluation Hub',
+              detail: 'Form Submitted Successfully',
+            });
+            this._auth_service.update_forms(this.selected_faculty._id)
+            this.back_to_faculty()
+          },
+          (err) => {
+            this._loadingService.hide();
+            this._toast_service.show({
+              severity: 'Error',
+              summary: 'Student Evaluation Hub',
+              detail: 'Form Submitted Unsuccessfully',
+            });
+          }
+        );
+    }else{
+      this.form_validation_dialog = true
+    }
+    
+  }
+
 
   handle_signout() {
     this._auth_service.sign_out();
     this._navigation.navigate_to_link();
+  }
+
+  is_complete(id:string){
+    if(this._auth_service.get_forms()){
+      return id in this._auth_service.get_forms()
+    }else{
+      return false
+    }
   }
 }
