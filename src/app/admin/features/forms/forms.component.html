@@ -1,0 +1,253 @@
+<main>
+  <div class="flex flex-col space-y-8 p-5">
+    <div class="flex flex-col">
+      <h1 class="text-3xl font-semibold overflow-hidden">Forms</h1>
+      <p class="text-sm">Manage forms, create, update, and delete forms.</p>
+    </div>
+
+    <div class="flex flex-col space-y-5 justify-between items-center w-full">
+      <div class="w-full flex justify-between">
+        <div class="shadow-md w-[500px] bg-white flex items-center mb-3">
+          <input
+            (input)="onGlobalFilterChange($event)"
+            class="px-3 py-2 outline-none text-sm w-full"
+            type="text"
+            placeholder="Search keyword"
+          />
+          <div class="px-3 py-2">
+            <i class="pi pi-search"></i>
+          </div>
+        </div>
+        <div class="flex space-x-3">
+          <select
+            (change)="on_select_sem($event)"
+            class="p-2 bg-white shadow-md mb-3 outline-none cursor-pointer"
+            name=""
+            id=""
+          >
+            <option value="">-- Select Semester --</option>
+            <option value="1">1st Semester</option>
+            <option value="2">2nd Semester</option>
+          </select>
+          <select
+            (change)="on_select_sy($event)"
+            class="p-2 bg-white shadow-md mb-3 outline-none cursor-pointer"
+            name=""
+            id=""
+          >
+            <option value="">-- Select School Year --</option>
+            <option value="SY-2025-2026">SY-2025-2026</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="w-full bg-white shadow-md mb-3">
+        <div class="w-full">
+          <p-table
+            [value]="pagedData"
+            dataKey="_id"
+            [rows]="rows"
+            [scrollable]="true"
+            [scrollHeight]="'320px'"
+            class="w-full max-w-screen-lg text-sm text-primary"
+          >
+            <ng-template #header>
+              <tr class="text-left text-xs md:text-sm">
+                <th class="p-5 !bg-slate-300"></th>
+                <th class="p-5 !bg-slate-300">School Year</th>
+                <th class="p-5 !bg-slate-300">Semester</th>
+                <th class="p-5 !bg-slate-300">Status</th>
+              </tr>
+            </ng-template>
+
+            <ng-template #body let-rowData let-expanded="expanded">
+              <tr class="hover:!bg-slate-100 cursor-pointer">
+                <td class="w-[3rem]">
+                    <div class="flex">
+
+                        <p-button
+                        (onClick)="select_delete_form(rowData)"
+                          type="button"
+                          pRipple
+                          [text]="true"
+                          severity="danger"
+                          [icon]="
+                            'pi pi-trash'
+                          "
+                          pTooltip="Delete"
+                          tooltipPosition="right"
+                          placeholder="Right"
+                        />
+                        <p-button
+                        (onClick)="select_edit_form(rowData)"
+                          type="button"
+                          pRipple
+                          [text]="true"
+                          severity="info"
+                          [icon]="
+                            'pi pi-pencil'
+                          "
+                          pTooltip="Delete"
+                          tooltipPosition="right"
+                          placeholder="Right"
+                        />
+                    </div>
+                </td>
+                <td>{{ rowData.school_year }}</td>
+
+                @if(rowData.semester === 2){
+                <td>{{ rowData.semester }}nd Semester</td>
+                }@else {
+                <td>{{ rowData.semester }}st Semester</td>
+                } @if(rowData.status === 'Inactive'){
+
+                <td>
+                  <span
+                    class="text-sm text-red-500 bg-red-100 py-1 px-2 font-medium rounded-md text-base"
+                  >
+                    {{ rowData.status }}
+                  </span>
+                </td>
+                }@else{
+                <td>
+                  <span
+                    class="text-sm text-green-500 bg-green-100 py-1 px-2 font-medium rounded-md text-base"
+                  >
+                    {{ rowData.status }}
+                  </span>
+                </td>
+                }
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+        <div class="w-full">
+          <p-paginator
+            (onPageChange)="onPageChange($event)"
+            [first]="first"
+            [rows]="rows"
+            [totalRecords]="total_records"
+            class="text-xs md:text-sm rounded-none mt-2"
+          ></p-paginator>
+        </div>
+      </div>
+      <div class="w-full">
+        <div (click)="create_dialog_visibility = true" class="bg-white w-max flex items-center gap-3 p-3 shadow-md mb-3 cursor-pointer">
+             <i class="pi pi-plus"></i>
+             <span class="text-base">Add Form</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<p-dialog
+  header="Create Form"
+  [modal]="true"
+  [(visible)]="create_dialog_visibility"
+  [style]="{ width: '32rem' }"
+  class="!rounded-none"
+> 
+
+    <div class="flex justify-between">
+        <select
+
+        class="p-2 border border-gray-200  outline-none cursor-pointer"
+        name=""
+        id=""
+        >
+        <option value="">-- Select Semester --</option>
+        <option value="1">1st Semester</option>
+        <option value="2">2nd Semester</option>
+        </select>
+        <select
+        class="p-2 border border-gray-200  outline-none cursor-pointer"
+        name=""
+        id=""
+        >
+        <option value="">-- Select School Year --</option>
+        <option value="SY-2025-2026">SY-2025-2026</option>
+        </select>
+    </div>
+
+    <div class="border border-gray-200 w-max flex items-center gap-3 p-2 cursor-pointer mt-3">
+            <i class="pi pi-plus"></i>
+            <span class="text-sm">Add Category</span>
+    </div>
+
+<div class="flex justify-end gap-2 mt-5">
+
+
+    <p-button
+      label="Cancel"
+      severity="secondary"
+      (click)="create_dialog_visibility = false"
+    />
+    <p-button label="Create" />
+  </div>
+
+</p-dialog>
+
+
+<p-dialog
+  header="Delete Form"
+  [modal]="true"
+  [(visible)]="delete_dialog_visibility"
+  [style]="{ width: '25rem' }"
+  class="!rounded-none"
+>
+  <div class="w-full bg-red-100 text-red-700 border border-red-700 p-3">
+    This cant be undo. Are You sure do you want to delete?
+  </div>
+
+
+<div class="flex justify-end gap-2 mt-5">
+    <p-button
+      label="Cancel"
+      severity="secondary"
+      (click)="delete_dialog_visibility = false"
+    />
+    <p-button (onClick)="handle_delete_dialog()"  severity="danger" label="Delete" />
+  </div>
+
+</p-dialog>
+
+<p-dialog
+  header="Edit Form"
+  [modal]="true"
+  [(visible)]="edit_dialog_visibility"
+  [style]="{ width: '25rem' }"
+  class="!rounded-none"
+>
+  <div class="w-full bg-blue-100 text-blue-700 border border-blue-700 p-3">
+    Are You sure do you want to edit?
+  </div>
+
+<div class="flex justify-between gap-2 mt-5">
+    @if(current_status === 'Active'){
+        <p-button
+          [label]="current_status"
+          severity="success"
+          (click)="change_form_status()"
+        />
+    }@else {
+        <p-button
+          [label]="current_status"
+          severity="danger"
+          (click)="change_form_status()"
+        />
+    }
+
+
+
+    <div class="flex gap-2">
+            <p-button
+      label="Cancel"
+      severity="secondary"
+      (click)="edit_dialog_visibility = false"
+    />
+    <p-button (onClick)="handle_edit_dialog()"  severity="info" label="Edit" />
+    </div>
+  </div>
+
+</p-dialog>

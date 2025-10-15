@@ -7,12 +7,14 @@ import { LoginComponent } from './authentication/features/login/login.component'
 import { auth_guard } from './core/guards/auth.guard';
 import { StudentComponent } from './student/student.component';
 import { FacultyMainComponent } from './faculty-main/faculty-main.component';
+import { FormsComponent } from './admin/features/forms/forms.component';
 
 export const routes: Routes = [
     {
         path: 'admin', component: AdminComponent, children: [
             {path: "overview", component: OverviewComponent},
-            {path: "departments", component: FacultyComponent }
+            {path: "departments", component: FacultyComponent },
+            {path: "forms", component: FormsComponent },
         ]
     },
 

@@ -46,6 +46,9 @@ export class FacultyComponent {
   public neutral_sentiments_data: any;
   public negative_sentiments_data: any;
   public filters: { [key: string]: string } = {};
+  public selected_sem!: string
+  public selected_sy!: string
+
 
   private _api = inject(HttpClient);
   private _toast_service = inject(ToastService);
@@ -57,21 +60,44 @@ export class FacultyComponent {
   ngAfterViewInit() {
     this.fetch_data();
   }
+  
+  on_select_sem(event:Event){
+    this.selected_sem = (event.target as HTMLSelectElement).value
+    this.fetch_data()
+
+    setTimeout(() => {
+      this.render_bar_chart();
+      this.render_participation_score();
+    }, 100);
+
+  }
+
+  on_select_sy(event:Event){
+    this.selected_sy = (event.target as HTMLSelectElement).value
+    this.fetch_data()
+
+    setTimeout(() => {
+      this.render_bar_chart();
+      this.render_participation_score();
+    }, 100);
+  }
+
 
   fetch_data() {
     this._loadingService.show();
     const department_name = this._auth_service.getUser().department
-    const params = new HttpParams().set(
-      'department_name',
-      department_name
-    );
+
+    const params_obj:any = {}
+    if (this.selected_sy) params_obj.school_year = this.selected_sy
+    if (this.selected_sem) params_obj.semester = this.selected_sem
+    if (department_name) params_obj.department_name = department_name    
 
     this._api
       .get(`${dev_config.api_base_url}/department`, {
         headers: {
           'ngrok-skip-browser-warning': 'true',
         },
-        params
+        params: new HttpParams({fromObject: params_obj})
       })
 
       .subscribe(

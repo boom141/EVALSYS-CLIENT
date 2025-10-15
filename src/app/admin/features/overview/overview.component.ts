@@ -1,9 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { CardModule } from 'primeng/card';
 import { chart } from 'highcharts';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { dev_config } from '../../../environments/dev.env';
-
+import { ToastService } from '../../../core/services/toast.service';
+import { LoadingService } from '../../../core/services/loading.service';
 
 @Component({
   selector: 'app-overview',
@@ -15,36 +16,84 @@ export class OverviewComponent {
   public barchart_data: any;
   public donut_data: any;
   public infocards_data: any;
-  public postive_sentiments_data: any
-  public neutral_sentiments_data: any
-  public negative_sentiments_data: any
+  public postive_sentiments_data: any;
+  public neutral_sentiments_data: any;
+  public negative_sentiments_data: any;
+  public selected_sem!: string;
+  public selected_sy!: string;
 
-  private _api = inject(HttpClient)
+  private _api = inject(HttpClient);
+  private _toast_service = inject(ToastService);
+  private _loadingService = inject(LoadingService);
 
   ngOnInit(): void {
-    this.fetch_data()
+    this.fetch_data();
   }
-  
+
   ngAfterViewInit(): void {
     this.render_bar_chart();
     this.render_participation_score();
   }
 
-  fetch_data(){
-    this._api.get(`${dev_config.api_base_url}/overview`, {
-      headers:{
-        "ngrok-skip-browser-warning": "true"
-      }
-    }).subscribe((res:any)=>{
-      this.infocards_data = res.info_cards
-      this.barchart_data = res.sentiment_data
-      this.donut_data = res.participation_score
-      this.postive_sentiments_data = res.sentiment_data.positive.feedbacks
-      this.neutral_sentiments_data = res.sentiment_data.neutral.feedbacks
-      this.negative_sentiments_data = res.sentiment_data.negative.feedbacks
-    })
+  on_select_sem(event: Event) {
+    this.selected_sem = (event.target as HTMLSelectElement).value;
+    this.fetch_data();
+
+    setTimeout(() => {
+      this.render_bar_chart();
+      this.render_participation_score();
+    }, 100);
   }
 
+  on_select_sy(event: Event) {
+    this.selected_sy = (event.target as HTMLSelectElement).value;
+    this.fetch_data();
+
+    setTimeout(() => {
+      this.render_bar_chart();
+      this.render_participation_score();
+    }, 100);
+  }
+
+  fetch_data() {
+    this._loadingService.show();
+    const params_obj: any = {};
+    if (this.selected_sy) params_obj.school_year = this.selected_sy;
+    if (this.selected_sem) params_obj.semester = this.selected_sem;
+
+    this._api
+      .get(`${dev_config.api_base_url}/overview`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+        },
+        params: new HttpParams({ fromObject: params_obj }),
+      })
+      .subscribe(
+        (res: any) => {
+          this.infocards_data = res.info_cards;
+          this.barchart_data = res.sentiment_data;
+          this.donut_data = res.participation_score;
+          this.postive_sentiments_data = res.sentiment_data.positive.feedbacks;
+          this.neutral_sentiments_data = res.sentiment_data.neutral.feedbacks;
+          this.negative_sentiments_data = res.sentiment_data.negative.feedbacks;
+
+          this._loadingService.hide();
+          this._toast_service.show({
+            severity: 'success',
+            summary: 'Overview',
+            detail: 'Data Loaded Successfully',
+          });
+        },
+        (err) => {
+          this._loadingService.hide();
+          this._toast_service.show({
+            severity: 'error',
+            summary: 'Overview',
+            detail: 'Data Loaded Unsuccessfully',
+          });
+        }
+      );
+  }
 
   render_bar_chart() {
     (this.barchart_data = [

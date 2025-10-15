@@ -7,7 +7,7 @@
 
     @if(selected_faculty === null){
     <div class="flex flex-col space-y-5 justify-between items-center w-full">
-      <div class="w-full">
+      <div class="w-full flex justify-between">
         <div class="shadow-md w-[500px] bg-white flex items-center mb-3">
           <input
             (input)="onGlobalFilterChange($event)"
@@ -18,6 +18,27 @@
           <div class="px-3 py-2">
             <i class="pi pi-search"></i>
           </div>
+        </div>
+        <div class="flex space-x-3">
+          <select
+            (change)="on_select_sem($event)"
+            class="p-2 bg-white shadow-md mb-3 outline-none cursor-pointer"
+            name=""
+            id=""
+          >
+            <option value="">-- Select Semester --</option>
+            <option value="1">1st Semester</option>
+            <option value="2">2nd Semester</option>
+          </select>
+          <select
+            (change)="on_select_sy($event)"
+            class="p-2 bg-white shadow-md mb-3 outline-none cursor-pointer"
+            name=""
+            id=""
+          >
+            <option value="">-- Select School Year --</option>
+            <option value="sy-2025-2026">SY-2025-2026</option>
+          </select>
         </div>
       </div>
 
@@ -54,16 +75,20 @@
                       [icon]="
                         expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'
                       "
-                      pTooltip="Expand" tooltipPosition="right" placeholder="Right" 
+                      pTooltip="Expand"
+                      tooltipPosition="right"
+                      placeholder="Right"
                     />
-                      <p-button
+                    <p-button
                       (onClick)="export_data(rowData)"
                       type="button"
                       pRipple
                       [text]="true"
                       severity="secondary"
                       [icon]="'pi pi-upload'"
-                      pTooltip="Export" tooltipPosition="right" placeholder="Right" 
+                      pTooltip="Export"
+                      tooltipPosition="right"
+                      placeholder="Right"
                     />
                   </div>
                 </td>
@@ -161,8 +186,10 @@
           <h1 class="text-base !bg-slate-300 p-3">Sentiment Polarity Count</h1>
           <div class="m-5 max-h-[300px] p-3" id="sentiments_barchart"></div>
         </div>
-        <div class="shadow-md w-full  bg-white max-w-[500px] mb-3">
-          <h1 class="text-base !bg-slate-300 p-3">Students Participation Score</h1>
+        <div class="shadow-md w-full bg-white max-w-[500px] mb-3">
+          <h1 class="text-base !bg-slate-300 p-3">
+            Students Participation Score
+          </h1>
           <div class="m-5 max-h-[300px] p-3" id="participation_score"></div>
         </div>
       </div>
@@ -273,7 +300,7 @@
                         Negative Polarity Feedbacks
                       </h1>
                       <div
-                        class=" p-3 overflow-auto overflow-x-hidden max-h-[500px]"
+                        class="p-3 overflow-auto overflow-x-hidden max-h-[500px]"
                       >
                         @for(data of negative_sentiments_data; track $index){
                         <div

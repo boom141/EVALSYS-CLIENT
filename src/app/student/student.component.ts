@@ -206,9 +206,9 @@ export class StudentComponent {
   submit() {
 
     if(this.findFirstNullScoreIndex() === null){
-      const questionaire: any = {};
+      const questionnaire: any = {};
       this.form_data.forEach((category: any, indx: number) => {
-        questionaire[`category_${indx + 1}`] = category.questions.map(
+        questionnaire[`category_${indx + 1}`] = category.questions.map(
           (item: any) => ({
             score: item.score,
           })
@@ -218,7 +218,7 @@ export class StudentComponent {
       const evaluation_data = {
         student_id: this._auth_service.getUser()._id,
         teacher_id: this.selected_faculty._id,
-        questionaire,
+        questionnaire,
         feedback: {
           message: this.feedback.nativeElement.value,
         },
