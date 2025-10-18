@@ -25,7 +25,7 @@
             name=""
             id=""
           >
-            <option value="">-- Select Semester --</option>
+            <option value="" disabled selected hidden>-- Select Semester --</option>
             <option value="1">1st Semester</option>
             <option value="2">2nd Semester</option>
           </select>
@@ -35,7 +35,7 @@
             name=""
             id=""
           >
-            <option value="">-- Select School Year --</option>
+            <option value="" disabled selected hidden>-- Select School Year --</option>
             <option value="SY-2025-2026">SY-2025-2026</option>
           </select>
         </div>
@@ -63,35 +63,30 @@
             <ng-template #body let-rowData let-expanded="expanded">
               <tr class="hover:!bg-slate-100 cursor-pointer">
                 <td class="w-[3rem]">
-                    <div class="flex">
-
-                        <p-button
-                        (onClick)="select_delete_form(rowData)"
-                          type="button"
-                          pRipple
-                          [text]="true"
-                          severity="danger"
-                          [icon]="
-                            'pi pi-trash'
-                          "
-                          pTooltip="Delete"
-                          tooltipPosition="right"
-                          placeholder="Right"
-                        />
-                        <p-button
-                        (onClick)="select_edit_form(rowData)"
-                          type="button"
-                          pRipple
-                          [text]="true"
-                          severity="info"
-                          [icon]="
-                            'pi pi-pencil'
-                          "
-                          pTooltip="Delete"
-                          tooltipPosition="right"
-                          placeholder="Right"
-                        />
-                    </div>
+                  <div class="flex">
+                    <p-button
+                      (onClick)="select_delete_form(rowData)"
+                      type="button"
+                      pRipple
+                      [text]="true"
+                      severity="danger"
+                      [icon]="'pi pi-trash'"
+                      pTooltip="Delete"
+                      tooltipPosition="right"
+                      placeholder="Right"
+                    />
+                    <p-button
+                      (onClick)="select_edit_form(rowData)"
+                      type="button"
+                      pRipple
+                      [text]="true"
+                      severity="info"
+                      [icon]="'pi pi-pencil'"
+                      pTooltip="Delete"
+                      tooltipPosition="right"
+                      placeholder="Right"
+                    />
+                  </div>
                 </td>
                 <td>{{ rowData.school_year }}</td>
 
@@ -132,10 +127,17 @@
         </div>
       </div>
       <div class="w-full">
-        <div (click)="create_dialog_visibility = true" class="bg-white w-max flex items-center gap-3 p-3 shadow-md mb-3 cursor-pointer">
-             <i class="pi pi-plus"></i>
-             <span class="text-base">Add Form</span>
-        </div>
+            <p-button
+      (onClick)="create_dialog_visibility = true"
+      
+      type="button"
+      pRipple
+      [icon]="'pi pi-plus'"
+      size="small"
+      label="Add Form"
+      tooltipPosition="right"
+      placeholder="Right"
+    />
       </div>
     </div>
   </div>
@@ -145,49 +147,96 @@
   header="Create Form"
   [modal]="true"
   [(visible)]="create_dialog_visibility"
+  (onShow)="set_form()"
+  (onHide)="reset_form()"
   [style]="{ width: '32rem' }"
   class="!rounded-none"
-> 
+>
+  <div class="flex justify-between">
+    <select
+      (click)="on_select_sem_form($event)"
+      class="p-2 border border-gray-200 outline-none cursor-pointer"
+      #sy_form
+    >
+      <option value="" disabled selected hidden>-- Select Semester --</option>
+      <option value="1">1st Semester</option>
+      <option value="2">2nd Semester</option>
+    </select>
+    <select
+      (click)="on_select_sy_form($event)"
+      class="p-2 border border-gray-200 outline-none cursor-pointer"
+      #sem_form
+    >
+      <option value="" disabled selected hidden>-- Select School Year --</option>
+      <option value="SY-2025-2026">SY-2025-2026</option>
+    </select>
+  </div>
+  <div class="mt-3 overflow-y-scroll max-h-[300px]">
+    @if(new_form_data.length !== 0){ @for(item of new_form_data; track $index){
+    <div class="bg-slate-100 p-3 space-y-2 text-sm mb-2">
+      <div class="flex flex-col gap-2">
+        <label>Category Name</label>
+        <input
+          pInputText
+          [(ngModel)]="item.category"
+          placeholder="Enter category name..."
+          pSize="small"
+          class="!rounded-none w-full"
+        />
+      </div>
+      @if(item.questions.length !== 0){ @for(question of item.questions; track
+      $index){
+      <div class="flex flex-col gap-2">
+        <label>Question {{ $index + 1 }}</label>
+        <input
+          pInputText
+          [(ngModel)]="question.text"
+          placeholder="Enter question..."
+          pSize="small"
+          class="!rounded-none w-full"
+        />
+      </div>
+      } }
 
-    <div class="flex justify-between">
-        <select
-
-        class="p-2 border border-gray-200  outline-none cursor-pointer"
-        name=""
-        id=""
-        >
-        <option value="">-- Select Semester --</option>
-        <option value="1">1st Semester</option>
-        <option value="2">2nd Semester</option>
-        </select>
-        <select
-        class="p-2 border border-gray-200  outline-none cursor-pointer"
-        name=""
-        id=""
-        >
-        <option value="">-- Select School Year --</option>
-        <option value="SY-2025-2026">SY-2025-2026</option>
-        </select>
+      <p-button
+        (onClick)="add_category_question($index)"
+        type="button"
+        pRipple
+        [icon]="'pi pi-plus'"
+        size="small"
+        label="Add Question"
+        tooltipPosition="right"
+        placeholder="Right"
+      />
     </div>
+    } }
+  </div>
+  <div class="mt-5">
+    <p-button
+      (onClick)="add_category()"
+      type="button"
+      pRipple
+      [icon]="'pi pi-plus'"
+      size="small"
+      label="Add Category"
+      tooltipPosition="right"
+      placeholder="Right"
+    />
+  </div>
 
-    <div class="border border-gray-200 w-max flex items-center gap-3 p-2 cursor-pointer mt-3">
-            <i class="pi pi-plus"></i>
-            <span class="text-sm">Add Category</span>
-    </div>
-
-<div class="flex justify-end gap-2 mt-5">
-
-
+  <div class="flex justify-end gap-2 mt-5">
     <p-button
       label="Cancel"
       severity="secondary"
       (click)="create_dialog_visibility = false"
     />
-    <p-button label="Create" />
+    @if(edit_button_Active){
+        <p-button severity="info" (onClick)="handle_edit_dialog()" label="Edit" />
+    }@else {
+        <p-button (onClick)="create_new_form()" label="Create" />
+    }
   </div>
-
 </p-dialog>
-
 
 <p-dialog
   header="Delete Form"
@@ -200,16 +249,18 @@
     This cant be undo. Are You sure do you want to delete?
   </div>
 
-
-<div class="flex justify-end gap-2 mt-5">
+  <div class="flex justify-end gap-2 mt-5">
     <p-button
       label="Cancel"
       severity="secondary"
       (click)="delete_dialog_visibility = false"
     />
-    <p-button (onClick)="handle_delete_dialog()"  severity="danger" label="Delete" />
+    <p-button
+      (onClick)="handle_delete_dialog()"
+      severity="danger"
+      label="Delete"
+    />
   </div>
-
 </p-dialog>
 
 <p-dialog
@@ -223,31 +274,28 @@
     Are You sure do you want to edit?
   </div>
 
-<div class="flex justify-between gap-2 mt-5">
+  <div class="flex justify-between gap-2 mt-5">
     @if(current_status === 'Active'){
-        <p-button
-          [label]="current_status"
-          severity="success"
-          (click)="change_form_status()"
-        />
+    <p-button
+      [label]="current_status"
+      severity="success"
+      (click)="update_form()"
+    />
     }@else {
-        <p-button
-          [label]="current_status"
-          severity="danger"
-          (click)="change_form_status()"
-        />
+    <p-button
+      [label]="current_status"
+      severity="danger"
+      (click)="update_form()"
+    />
     }
 
-
-
     <div class="flex gap-2">
-            <p-button
-      label="Cancel"
-      severity="secondary"
-      (click)="edit_dialog_visibility = false"
-    />
-    <p-button (onClick)="handle_edit_dialog()"  severity="info" label="Edit" />
+      <p-button
+        label="Cancel"
+        severity="secondary"
+        (click)="edit_dialog_visibility = false"
+      />
+      <p-button (onClick)="init_edit_form()" severity="info" label="Edit" />
     </div>
   </div>
-
 </p-dialog>

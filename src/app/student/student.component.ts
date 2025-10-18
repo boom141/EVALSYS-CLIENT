@@ -218,6 +218,8 @@ export class StudentComponent {
       const evaluation_data = {
         student_id: this._auth_service.getUser()._id,
         teacher_id: this.selected_faculty._id,
+        school_year: 'SY-2025-2026',
+        semester: 1,
         questionnaire,
         feedback: {
           message: this.feedback.nativeElement.value,

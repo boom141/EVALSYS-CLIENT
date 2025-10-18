@@ -22,6 +22,7 @@ export class AppComponent {
     public is_loading: boolean = false
 
     ngOnInit(): void {
+
       this._loadingService.setLoading.subscribe(value =>{
         this.is_loading = value
       })

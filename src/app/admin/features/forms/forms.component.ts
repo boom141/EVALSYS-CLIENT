@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Component, inject } from '@angular/core';
+import { Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -25,10 +25,11 @@ import { TooltipModule } from 'primeng/tooltip';
     InputTextModule,
     CardModule,
     DialogModule,
-    TooltipModule
+    TooltipModule,
+    InputTextModule,
   ],
   templateUrl: './forms.component.html',
-  styleUrl: './forms.component.scss'
+  styleUrl: './forms.component.scss',
 })
 export class FormsComponent {
   public first: number = 0;
@@ -41,24 +42,30 @@ export class FormsComponent {
   public form_data: any = null;
   public teacher_name!: string;
   public filters: { [key: string]: string } = {};
-  public selected_sem!: string
-  public selected_sy!: string
-  public current_status!:string
+  public selected_sem!: string;
+  public selected_sy!: string;
+  public selected_sem_form!: string;
+  public selected_sy_form!: string;
+  public current_status!: string;
+  public new_form_data: any[] = [];
 
   public goback_dialog_visibility: boolean = false;
   public submit_dialog_visibility: boolean = false;
   public delete_dialog_visibility: boolean = false;
   public edit_dialog_visibility: boolean = false;
-  public create_dialog_visibility: boolean = false
+  public create_dialog_visibility: boolean = false;
+  public edit_button_Active: boolean = false
 
   private _api = inject(HttpClient);
   private _toast_service = inject(ToastService);
   private _loadingService = inject(LoadingService);
-  private _auth_service = inject(Auth_Service)
+  private _auth_service = inject(Auth_Service);
 
-  ngOnInit(): void {
 
-  }
+  @ViewChild('sy_form') sy_form!: ElementRef<HTMLSelectElement>
+  @ViewChild('sem_form') sem_form!: ElementRef<HTMLSelectElement>
+
+  ngOnInit(): void {}
 
   ngAfterViewInit() {
     this.fetch_data();
@@ -74,24 +81,27 @@ export class FormsComponent {
     // this.submit()
   }
 
-  handle_delete_dialog(){
+  handle_delete_dialog() {
     this._loadingService.show();
     this._api
-      .delete(`${dev_config.api_base_url}/forms/${this.temp_selected_form._id}`, {
-        headers: {
-          'ngrok-skip-browser-warning': 'true',
-        },
-      })
+      .delete(
+        `${dev_config.api_base_url}/forms/${this.temp_selected_form._id}`,
+        {
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+          },
+        }
+      )
       .subscribe(
-        (res: any) => {    
+        (res: any) => {
           this._loadingService.hide();
           this._toast_service.show({
             severity: 'success',
             summary: 'Forms',
             detail: 'Data Deleted Successfully',
           });
-          this.delete_dialog_visibility = false
-          this.fetch_data()
+          this.delete_dialog_visibility = false;
+          this.fetch_data();
         },
         (err) => {
           this._loadingService.hide();
@@ -100,33 +110,42 @@ export class FormsComponent {
             summary: 'Forms',
             detail: 'Data Deleted Unsuccessfully',
           });
-          this.delete_dialog_visibility = false
-          this.fetch_data()
+          this.delete_dialog_visibility = false;
+          this.fetch_data();
         }
       );
   }
 
-  change_form_status(){
+  update_form() {
     this._loadingService.show();
-    console.log(this.temp_selected_form._id)
+    if(!this.edit_button_Active){
+      this.temp_selected_form.status = this.temp_selected_form.status === 'Inactive' ? 'Active' : 'Inactive'
+    }
+    const form_id = this.temp_selected_form._id
+    delete this.temp_selected_form._id
     this._api
-      .put(`${dev_config.api_base_url}/forms/${this.temp_selected_form._id}`, {
-        status: this.temp_selected_form.status === 'Inactive' ? 'Active' : 'Inactive'
-      }, {
-        headers: {
-          'ngrok-skip-browser-warning': 'true',
+      .put(
+        `${dev_config.api_base_url}/forms/${form_id}`,
+        {
+          update_data: this.temp_selected_form
         },
-      })
+        {
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+          },
+        }
+      )
       .subscribe(
-        (res: any) => {    
+        (res: any) => {
           this._loadingService.hide();
           this._toast_service.show({
             severity: 'success',
             summary: 'Forms',
             detail: 'Data Updated Successfully',
           });
-          this.edit_dialog_visibility = false
-          this.fetch_data()
+          this.edit_dialog_visibility = false;
+          this.create_dialog_visibility = false
+          this.fetch_data();
         },
         (err) => {
           this._loadingService.hide();
@@ -135,51 +154,78 @@ export class FormsComponent {
             summary: 'Forms',
             detail: 'Data Updated Unsuccessfully',
           });
-          this.edit_dialog_visibility = false
-          this.fetch_data()
+          this.edit_dialog_visibility = false;
+          this.create_dialog_visibility = false
+          this.fetch_data();
         }
       );
+      
+      this.edit_button_Active = false
+      this.new_form_data = []
   }
 
-  handle_edit_dialog(){
-
+  handle_edit_dialog() {
+    this.temp_selected_form.semester = Number(this.selected_sem_form)  
+    this.temp_selected_form.school_year = this.selected_sy_form 
+    this.temp_selected_form.data = this.new_form_data
+    this.update_form()
   }
 
-
-  select_delete_form(row_data:any){
-    this.delete_dialog_visibility = true
-    this.temp_selected_form = row_data
+  select_delete_form(row_data: any) {
+    this.delete_dialog_visibility = true;
+    this.temp_selected_form = row_data;
   }
 
-  select_edit_form(row_data:any){
-    this.edit_dialog_visibility = true
-    this.temp_selected_form = row_data
-    this.current_status = this.temp_selected_form.status
-  }
-    on_select_sem(event:Event){
-    this.selected_sem = (event.target as HTMLSelectElement).value
-    this.fetch_data()
+  init_edit_form(){
+    this.edit_button_Active = true
+    this.new_form_data = this.temp_selected_form.data
+    this.selected_sem_form = this.temp_selected_form.semester
+    this.selected_sy_form = this.temp_selected_form.school_year
+    this.edit_dialog_visibility = false
+
+    this._loadingService.show()
+    setTimeout(()=>{
+      this._loadingService.hide()
+      this.create_dialog_visibility = true
+    },500)
   }
 
-  on_select_sy(event:Event){
-    this.selected_sy = (event.target as HTMLSelectElement).value
-    this.fetch_data()
+  select_edit_form(row_data: any) {
+    this.edit_dialog_visibility = true;
+    this.temp_selected_form = row_data;
+    this.current_status = this.temp_selected_form.status;
+  }
+  on_select_sem(event: Event) {
+    this.selected_sem = (event.target as HTMLSelectElement).value;
+    this.fetch_data();
   }
 
+  on_select_sy(event: Event) {
+    this.selected_sy = (event.target as HTMLSelectElement).value;
+    this.fetch_data();
+  }
+
+  on_select_sem_form(event: Event) {
+    this.selected_sem_form = (event.target as HTMLSelectElement).value;
+  }
+
+  on_select_sy_form(event: Event) {
+    this.selected_sy_form = (event.target as HTMLSelectElement).value;
+  }
 
   fetch_data() {
     this._loadingService.show();
-    
-    const params_obj:any = {}
-    if (this.selected_sy) params_obj.school_year = this.selected_sy
-    if (this.selected_sem) params_obj.semester = this.selected_sem
+
+    const params_obj: any = {};
+    if (this.selected_sy) params_obj.school_year = this.selected_sy;
+    if (this.selected_sem) params_obj.semester = this.selected_sem;
 
     this._api
       .get(`${dev_config.api_base_url}/forms`, {
         headers: {
           'ngrok-skip-browser-warning': 'true',
         },
-        params: new HttpParams({fromObject: params_obj})
+        params: new HttpParams({ fromObject: params_obj }),
       })
       .subscribe(
         (res: any) => {
@@ -273,5 +319,67 @@ export class FormsComponent {
     });
   }
 
+  add_category() {
+    this.new_form_data.push({
+      category: '',
+      questions: [],
+    });
+  }
 
+  add_category_question(indx: number) {
+    this.new_form_data[indx].questions.push({
+      text: '',
+      score: null,
+    });
+  }
+
+  create_new_form() {
+    this._loadingService.show();
+
+    const post_data = {
+      school_year: this.selected_sy_form,
+      semester: Number(this.selected_sem_form),
+      status: 'Inactive',
+      data: this.new_form_data,
+    };
+
+    this._api
+      .post(`${dev_config.api_base_url}/forms`, post_data, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+        },
+      })
+      .subscribe(
+        (res: any) => {
+          this.create_dialog_visibility = false;
+          this._loadingService.hide();
+          this._toast_service.show({
+            severity: 'success',
+            summary: 'Forms',
+            detail: 'Data Added Successfully',
+          });
+          this.fetch_data()
+        },
+        (err) => {
+          this.create_dialog_visibility = false;
+          this._loadingService.hide();
+          this._toast_service.show({
+            severity: 'Error',
+            summary: 'Forms',
+            detail: 'Data Added Unsuccessfully',
+          });
+        }
+      );
+      this.new_form_data = []
+  }
+
+  set_form(){
+    this.sy_form.nativeElement.value = this.selected_sem_form
+    this.sem_form.nativeElement.value = this.selected_sy_form
+  }
+  reset_form(){
+    this.sy_form.nativeElement.value = ''
+    this.sem_form.nativeElement.value = ''
+    this.new_form_data = []
+  }
 }

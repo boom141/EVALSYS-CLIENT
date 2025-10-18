@@ -1,5 +1,5 @@
-import { Component, inject } from '@angular/core';
-import { TableModule } from 'primeng/table';
+import { Component, inject, ViewChild } from '@angular/core';
+import { Table, TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
@@ -14,6 +14,9 @@ import { LoadingService } from '../../../core/services/loading.service';
 import { TooltipModule } from 'primeng/tooltip';
 import { ReportTemplateService } from '../../../core/services/report_template.service';
 import { Auth_Service } from '../../../core/services/auth.service';
+import { DialogModule } from 'primeng/dialog';
+import { MultiSelectModule } from 'primeng/multiselect';
+
 @Component({
   selector: 'app-faculty',
   imports: [
@@ -24,7 +27,9 @@ import { Auth_Service } from '../../../core/services/auth.service';
     FormsModule,
     InputTextModule,
     CardModule,
-    TooltipModule
+    TooltipModule,
+    DialogModule,
+    MultiSelectModule,
   ],
   templateUrl: './faculty.component.html',
   styleUrl: './faculty.component.scss',
@@ -36,7 +41,9 @@ export class FacultyComponent {
   public filtered_data: any[] = [];
   public source_data!: any[];
   public selected_faculty: any = null;
+  public temp_selected_faculty: any = null;
   public selected_section: any = null;
+  public selected_sections!: any[];
 
   public leaderboard_data: any;
   public barchart_data: any;
@@ -46,35 +53,27 @@ export class FacultyComponent {
   public neutral_sentiments_data: any;
   public negative_sentiments_data: any;
   public filters: { [key: string]: string } = {};
-  public selected_sem!: string
-  public selected_sy!: string
+  public selected_sem!: string;
+  public selected_sy!: string;
+  public available_sections!: any[];
 
+  public add_section_dialog: boolean = false;
 
   private _api = inject(HttpClient);
   private _toast_service = inject(ToastService);
   private _loadingService = inject(LoadingService);
-  private _report_template_service = inject(ReportTemplateService)
-  private _auth_service = inject(Auth_Service)
-  
+  private _report_template_service = inject(ReportTemplateService);
+  private _auth_service = inject(Auth_Service);
+
+  @ViewChild('tableRef') tableRef!: Table;
 
   ngAfterViewInit() {
     this.fetch_data();
   }
-  
-  on_select_sem(event:Event){
-    this.selected_sem = (event.target as HTMLSelectElement).value
-    this.fetch_data()
 
-    setTimeout(() => {
-      this.render_bar_chart();
-      this.render_participation_score();
-    }, 100);
-
-  }
-
-  on_select_sy(event:Event){
-    this.selected_sy = (event.target as HTMLSelectElement).value
-    this.fetch_data()
+  on_select_sem(event: Event) {
+    this.selected_sem = (event.target as HTMLSelectElement).value;
+    this.fetch_data();
 
     setTimeout(() => {
       this.render_bar_chart();
@@ -82,29 +81,39 @@ export class FacultyComponent {
     }, 100);
   }
 
+  on_select_sy(event: Event) {
+    this.selected_sy = (event.target as HTMLSelectElement).value;
+    this.fetch_data();
+
+    setTimeout(() => {
+      this.render_bar_chart();
+      this.render_participation_score();
+    }, 100);
+  }
 
   fetch_data() {
     this._loadingService.show();
-    const department_name = this._auth_service.getUser().department
+    const department_name = this._auth_service.getUser().department;
 
-    const params_obj:any = {}
-    if (this.selected_sy) params_obj.school_year = this.selected_sy
-    if (this.selected_sem) params_obj.semester = this.selected_sem
-    if (department_name) params_obj.department_name = department_name    
+    const params_obj: any = {};
+    if (this.selected_sy) params_obj.school_year = this.selected_sy;
+    if (this.selected_sem) params_obj.semester = this.selected_sem;
+    if (department_name) params_obj.department_name = department_name;
 
     this._api
       .get(`${dev_config.api_base_url}/department`, {
         headers: {
           'ngrok-skip-browser-warning': 'true',
         },
-        params: new HttpParams({fromObject: params_obj})
+        params: new HttpParams({ fromObject: params_obj }),
       })
 
       .subscribe(
         (res: any) => {
-          this.source_data = res;
+          this.source_data = res.data;
           this.total_records = this.source_data.length;
           this.filtered_data = [...this.source_data];
+          this.available_sections = res.sections;
           this._loadingService.hide();
           this._toast_service.show({
             severity: 'success',
@@ -122,9 +131,50 @@ export class FacultyComponent {
         }
       );
   }
+  temp_select_faculty(row_data:any){
+    this.add_section_dialog = true
+    this.temp_selected_faculty = row_data
+  }
 
-  export_data(row_data:any){
-    this._report_template_service.set_report(row_data)
+  update_faculty_section() {
+    this._loadingService.show();
+    this._api
+      .put(
+        `${dev_config.api_base_url}/department/faculty/${this.temp_selected_faculty._id}`,
+        {
+          sections: this.selected_sections.map(item=>item.name),
+        },
+        {
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+          },
+        }
+      )
+
+      .subscribe(
+        (res: any) => {
+          this.add_section_dialog = false
+          this._loadingService.hide();
+          this._toast_service.show({
+            severity: 'success',
+            summary: 'Departments',
+            detail: 'Data Updated Successfully',
+          });
+        },
+        (err) => {
+          this.add_section_dialog = false
+          this._loadingService.hide();
+          this._toast_service.show({
+            severity: 'error',
+            summary: 'Departments',
+            detail: 'Data Updated Unsuccessfully',
+          });
+        }
+      );
+  }
+
+  export_data(row_data: any) {
+    this._report_template_service.set_report(row_data);
   }
 
   getDataKeys() {
@@ -182,6 +232,7 @@ export class FacultyComponent {
 
   select_faculty(row_data: any) {
     this.selected_faculty = row_data;
+    console.log(this.selected_faculty)
     this.leaderboard_data = this.selected_faculty.section_data;
     this.infocards_data = this.selected_faculty.overall_data.info_cards;
     this.barchart_data = this.selected_faculty.overall_data.sentiment_data;
@@ -194,6 +245,7 @@ export class FacultyComponent {
   }
 
   select_section(row_data: any) {
+    console.log(row_data)
     this.selected_section = row_data;
     this.postive_sentiments_data =
       this.selected_section.data.sentiment_data.positive.feedbacks;
@@ -201,6 +253,11 @@ export class FacultyComponent {
       this.selected_section.data.sentiment_data.neutral.feedbacks;
     this.negative_sentiments_data =
       this.selected_section.data.sentiment_data.negative.feedbacks;
+  }
+
+  is_sentiment_data_available(row_data:any){
+    console.log(row_data)
+    return 'sentiment_data' in row_data
   }
 
   back_to_faculty() {

@@ -7,12 +7,12 @@
 
     <div class="w-full flex space-x-3">
       <select (change)="on_select_sem($event)" class="p-2 bg-white shadow-md mb-3 outline-none cursor-pointer" name="" id="">
-        <option value="">-- Select Semester --</option>
+        <option value="" disabled selected hidden>-- Select Semester --</option>
         <option value="1">1st Semester</option>
         <option value="2">2nd Semester</option>
       </select>
       <select (change)="on_select_sy($event)" class="p-2 bg-white shadow-md mb-3 outline-none cursor-pointer" name="" id="">
-        <option value="">-- Select School Year --</option>
+        <option value="" disabled selected hidden>-- Select School Year --</option>
         <option value="sy-2025-2026">SY-2025-2026</option>
       </select>
     </div>

@@ -26,7 +26,7 @@
             name=""
             id=""
           >
-            <option value="">-- Select Semester --</option>
+            <option value="" disabled selected hidden>-- Select Semester --</option>
             <option value="1">1st Semester</option>
             <option value="2">2nd Semester</option>
           </select>
@@ -36,7 +36,7 @@
             name=""
             id=""
           >
-            <option value="">-- Select School Year --</option>
+            <option value="" disabled selected hidden>-- Select School Year --</option>
             <option value="sy-2025-2026">SY-2025-2026</option>
           </select>
         </div>
@@ -45,8 +45,9 @@
       <div class="w-full bg-white shadow-md mb-3">
         <div class="w-full">
           <p-table
+            #tableRef
             [value]="pagedData"
-            dataKey="_id"
+            dataKey="department_name"
             [rows]="rows"
             [scrollable]="true"
             [scrollHeight]="'320px'"
@@ -115,19 +116,46 @@
                     >
                       <ng-template #header>
                         <tr class="text-left text-xs md:text-sm">
+                          <th class="w-[5rem] p-5 !bg-slate-300"></th>
                           <th class="p-5 !bg-slate-300">Name</th>
                           <th class="p-5 !bg-slate-300">Evaluation Rating</th>
                           <th class="p-5 !bg-slate-300">Feedback Rating</th>
                           <th class="p-5 !bg-slate-300">Responses</th>
-                          <th class="p-5 !bg-slate-300"></th>
                         </tr>
                       </ng-template>
 
                       <ng-template #body let-subRowData>
                         <tr
-                          (click)="select_faculty(subRowData)"
                           class="hover:!bg-slate-100 cursor-pointer"
                         >
+                          <td>
+                            <div class="flex gap-3">
+                              <p-button
+                                (onClick)="select_faculty(subRowData)"
+                                type="button"
+                                pRipple
+                                [pRowToggler]="rowData"
+                                [text]="true"
+                                severity="secondary"
+                                [icon]="'pi pi-eye'"
+                                pTooltip="View"
+                                tooltipPosition="right"
+                                placeholder="Right"
+                              />
+                              <p-button
+                                (onClick)="temp_select_faculty(subRowData)"
+                                type="button"
+                                pRipple
+                                [pRowToggler]="rowData"
+                                [text]="true"
+                                severity="secondary"
+                                [icon]="'pi pi-users'"
+                                pTooltip="Assign Section"
+                                tooltipPosition="right"
+                                placeholder="Right"
+                              />
+                            </div>
+                          </td>
                           <td>{{ subRowData.name }}</td>
                           <td>
                             {{ subRowData.overall_data.evaluation_rating }}% /
@@ -140,11 +168,6 @@
                           <td class="w-36">
                             ({{ subRowData.overall_data.total_response }})
                             response
-                          </td>
-                          <td>
-                            <div class="flex justify-center items-center">
-                              <i class="pi pi-chevron-right"></i>
-                            </div>
                           </td>
                         </tr>
                       </ng-template>
@@ -196,7 +219,7 @@
       <div class="flex flex-row space-x-5 w-full">
         <p-table
           [value]="leaderboard_data"
-          dataKey="_id"
+          dataKey="name"
           [rows]="rows"
           [scrollable]="true"
           [scrollHeight]="'1000px'"
@@ -214,7 +237,7 @@
 
           <ng-template #body let-rowData let-expanded="expanded">
             <tr
-              (click)="select_section(rowData)"
+         
               class="hover:!bg-slate-100 cursor-pointer"
             >
               <td>
@@ -242,86 +265,88 @@
                   <span class="text-base text-[#282828]"
                     >{{ rowData.name }}'s Feedbacks / Comments</span
                   >
-                  <div class="flex flex-row justify-between gap-3 h-max">
-                    <div class="shadow-md w-full bg-white mb-3">
-                      <h1 class="text-base font-medium !bg-slate-300 p-3">
-                        Positve Polarity Feedbacks
-                      </h1>
-                      <div
-                        class="p-3 overflow-auto overflow-x-hidden max-h-[500px]"
-                      >
-                        @for(data of postive_sentiments_data; track $index){
+                  @if(is_sentiment_data_available(rowData.data)){                
+                    <div class="flex flex-row justify-between gap-3 h-max">
+                      <div class="shadow-md w-full bg-white mb-3">
+                        <h1 class="text-base font-medium !bg-slate-300 p-3">
+                          Positve Polarity Feedbacks
+                        </h1>
                         <div
-                          class="flex flex-col p-3 border-l-2 border-[#43900C] mt-3"
+                          class="p-3 overflow-auto overflow-x-hidden max-h-[500px]"
                         >
-                          <p class="w-max-full text-sm italic">
-                            "{{ data.message }}"
-                          </p>
-                          <div class="flex w-full justify-between mt-5">
-                            <span class="text-sm text-slate-400"
-                              >Anonymous</span
-                            >
-                            <span class="text-sm text-slate-400">{{
-                              data.timestamp
-                            }}</span>
+                          @for(data of rowData.data.sentiment_data.positive.feedbacks; track $index){
+                          <div
+                            class="flex flex-col p-3 border-l-2 border-[#43900C] mt-3"
+                          >
+                            <p class="w-max-full text-sm italic">
+                              "{{ data.message }}"
+                            </p>
+                            <div class="flex w-full justify-between mt-5">
+                              <span class="text-sm text-slate-400"
+                                >Anonymous</span
+                              >
+                              <span class="text-sm text-slate-400">{{
+                                data.timestamp
+                              }}</span>
+                            </div>
                           </div>
+                          }
                         </div>
-                        }
+                      </div>
+                      <div class="shadow-md w-full bg-white mb-3">
+                        <h1 class="text-base font-medium !bg-slate-300 p-3">
+                          Neutral Polarity Feedbacks
+                        </h1>
+                        <div
+                          class="p-3 overflow-auto overflow-x-hidden max-h-[500px]"
+                        >
+                          @for(data of rowData.data.sentiment_data.neutral.feedbacks; track $index){
+                          <div
+                            class="flex flex-col p-3 border-l-2 border-[#CECECE] mt-3"
+                          >
+                            <p class="w-max-full text-sm italic">
+                              "{{ data.message }}"
+                            </p>
+                            <div class="flex w-full justify-between mt-5">
+                              <span class="text-sm text-slate-400"
+                                >Anonymous</span
+                              >
+                              <span class="text-sm text-slate-400">{{
+                                data.timestamp
+                              }}</span>
+                            </div>
+                          </div>
+                          }
+                        </div>
+                      </div>
+                      <div class="shadow-md w-full bg-white mb-3">
+                        <h1 class="text-base font-medium !bg-slate-300 p-3">
+                          Negative Polarity Feedbacks
+                        </h1>
+                        <div
+                          class="p-3 overflow-auto overflow-x-hidden max-h-[500px]"
+                        >
+                          @for(data of rowData.data.sentiment_data.negative.feedbacks; track $index){
+                          <div
+                            class="flex flex-col p-3 border-l-2 border-[#DD1111]"
+                          >
+                            <p class="w-max-full text-sm italic">
+                              "{{ data.message }}"
+                            </p>
+                            <div class="flex w-full justify-between mt-5">
+                              <span class="text-sm text-slate-400"
+                                >Anonymous</span
+                              >
+                              <span class="text-sm text-slate-400">{{
+                                data.timestamp
+                              }}</span>
+                            </div>
+                          </div>
+                          }
+                        </div>
                       </div>
                     </div>
-                    <div class="shadow-md w-full bg-white mb-3">
-                      <h1 class="text-base font-medium !bg-slate-300 p-3">
-                        Neutral Polarity Feedbacks
-                      </h1>
-                      <div
-                        class="p-3 overflow-auto overflow-x-hidden max-h-[500px]"
-                      >
-                        @for(data of neutral_sentiments_data; track $index){
-                        <div
-                          class="flex flex-col p-3 border-l-2 border-[#CECECE] mt-3"
-                        >
-                          <p class="w-max-full text-sm italic">
-                            "{{ data.message }}"
-                          </p>
-                          <div class="flex w-full justify-between mt-5">
-                            <span class="text-sm text-slate-400"
-                              >Anonymous</span
-                            >
-                            <span class="text-sm text-slate-400">{{
-                              data.timestamp
-                            }}</span>
-                          </div>
-                        </div>
-                        }
-                      </div>
-                    </div>
-                    <div class="shadow-md w-full bg-white mb-3">
-                      <h1 class="text-base font-medium !bg-slate-300 p-3">
-                        Negative Polarity Feedbacks
-                      </h1>
-                      <div
-                        class="p-3 overflow-auto overflow-x-hidden max-h-[500px]"
-                      >
-                        @for(data of negative_sentiments_data; track $index){
-                        <div
-                          class="flex flex-col p-3 border-l-2 border-[#DD1111]"
-                        >
-                          <p class="w-max-full text-sm italic">
-                            "{{ data.message }}"
-                          </p>
-                          <div class="flex w-full justify-between mt-5">
-                            <span class="text-sm text-slate-400"
-                              >Anonymous</span
-                            >
-                            <span class="text-sm text-slate-400">{{
-                              data.timestamp
-                            }}</span>
-                          </div>
-                        </div>
-                        }
-                      </div>
-                    </div>
-                  </div>
+                  }
                 </div>
               </td>
             </tr>
@@ -332,3 +357,31 @@
     }
   </div>
 </main>
+
+
+<p-dialog
+  header="Add Section"
+  [modal]="true"
+  [(visible)]="add_section_dialog"
+  [style]="{ width: '25rem' }"
+  class="!rounded-none "
+>
+  <div class="flex space-x-3 w-full bg-blue-100 text-blue-700 border border-blue-700 p-3 text-sm">
+    <p>
+      Select section below and click "Save" to add it to the Faculty member
+    </p>
+  </div>
+
+
+  <p-multiselect appendTo="body" [options]="available_sections" [(ngModel)]="selected_sections" optionLabel="name" placeholder="--- Select Section ---" class="w-full mt-3" />
+
+<div class="flex justify-end gap-2 mt-5">
+    <p-button
+      label="Cancel"
+      severity="secondary"
+      (click)="add_section_dialog = false"
+    />
+    <p-button (onClick)="update_faculty_section()" label="Save" />
+  </div>
+
+</p-dialog>
