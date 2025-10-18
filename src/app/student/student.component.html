@@ -35,8 +35,14 @@
         </p>
       </div>
 
+      @if(!no_active_form){
+          <div class="w-full bg-red-100 text-red-700 border border-red-700 p-3 mt-5">
+    Evaluation is closed! No active forms at the moment.
+  </div>
+      }
+
       @if(selected_faculty === null){
-      <div class="mt-10">
+      <div class="mt-5">
         <div class="w-full">
           <div class="shadow-md w-[300px] bg-white flex items-center mb-3">
             <input

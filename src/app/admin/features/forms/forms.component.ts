@@ -106,7 +106,7 @@ export class FormsComponent {
         (err) => {
           this._loadingService.hide();
           this._toast_service.show({
-            severity: 'Error',
+            severity: 'error',
             summary: 'Forms',
             detail: 'Data Deleted Unsuccessfully',
           });
@@ -150,7 +150,7 @@ export class FormsComponent {
         (err) => {
           this._loadingService.hide();
           this._toast_service.show({
-            severity: 'Error',
+            severity: 'error',
             summary: 'Forms',
             detail: 'Data Updated Unsuccessfully',
           });
@@ -242,7 +242,7 @@ export class FormsComponent {
         (err) => {
           this._loadingService.hide();
           this._toast_service.show({
-            severity: 'Error',
+            severity: 'error',
             summary: 'Forms',
             detail: 'Data Loaded Unsuccessfully',
           });
@@ -364,7 +364,7 @@ export class FormsComponent {
           this.create_dialog_visibility = false;
           this._loadingService.hide();
           this._toast_service.show({
-            severity: 'Error',
+            severity: 'error',
             summary: 'Forms',
             detail: 'Data Added Unsuccessfully',
           });

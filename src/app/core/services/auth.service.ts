@@ -23,7 +23,6 @@ export class Auth_Service{
 
     update_forms(data:string){
         const session_forms = this.get_forms()
-        console.log(session_forms)
         session_forms[data] = true
         localStorage.setItem('sessionForms', JSON.stringify(session_forms))
     }

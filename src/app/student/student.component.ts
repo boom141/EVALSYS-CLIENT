@@ -46,7 +46,8 @@ export class StudentComponent {
 
   public goback_dialog_visibility: boolean = false;
   public submit_dialog_visibility: boolean = false;
-  public form_validation_dialog: boolean = false
+  public form_validation_dialog: boolean = false;
+  public no_active_form: boolean = false;
 
   @ViewChild('textarea') feedback!: ElementRef<HTMLTextAreaElement>;
 
@@ -55,23 +56,23 @@ export class StudentComponent {
   private _auth_service = inject(Auth_Service);
   private _toast_service = inject(ToastService);
   private _loadingService = inject(LoadingService);
-  private forms!: any
+  private forms!: any;
 
   ngOnInit(): void {
-    this._auth_service.set_forms()
-    this.form_data = evaluationCriteria[0].data;
+    this._auth_service.set_forms();
+    this.fetch_form_data();
   }
 
   ngAfterViewInit() {
-    this.forms = this._auth_service.get_forms()
+    this.forms = this._auth_service.get_forms();
     this.fetch_data();
   }
   get fetch_evaluation_questions() {
     return this.form_data;
   }
 
-  get current_user(){
-    return this._auth_service.getUser()
+  get current_user() {
+    return this._auth_service.getUser();
   }
 
   handle_goback_dialog() {
@@ -81,7 +82,39 @@ export class StudentComponent {
 
   handle_submit_dialog() {
     this.submit_dialog_visibility = false;
-    this.submit()
+    this.submit();
+  }
+
+  fetch_form_data() {
+    this._loadingService.show();
+    this._api
+      .get(`${dev_config.api_base_url}/forms`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+        },
+        params: new HttpParams().set('role', this._auth_service.getUser().role),
+      })
+      .subscribe(
+        (res: any) => {
+          this.no_active_form = true;
+          this.form_data = res.data;
+          this._loadingService.hide();
+          this._toast_service.show({
+            severity: 'success',
+            summary: 'Student Evaluation Hub',
+            detail: 'Form Loaded Successfully',
+          });
+        },
+        (err) => {
+          this.no_active_form = false;
+          this._loadingService.hide();
+          this._toast_service.show({
+            severity: 'error',
+            summary: 'Student Evaluation Hub',
+            detail: 'Form Loaded Unsuccessfully',
+          });
+        }
+      );
   }
 
   fetch_data() {
@@ -112,7 +145,7 @@ export class StudentComponent {
         (err) => {
           this._loadingService.hide();
           this._toast_service.show({
-            severity: 'Error',
+            severity: 'error',
             summary: 'Student Evaluation Hub',
             detail: 'Data Loaded Unsuccessfully',
           });
@@ -129,12 +162,22 @@ export class StudentComponent {
   }
 
   select_faculty(row_data: any) {
-    this.selected_faculty = row_data;
-    this.teacher_name = row_data.name;
+    if (!this.no_active_form) {
+      this._toast_service.show({
+        severity: 'error',
+        summary: 'Student Evaluation Hub',
+        detail: 'No active forms',
+      });
+    } else {
+      this.selected_faculty = row_data;
+      this.teacher_name = row_data.name;
+      this.fetch_form_data();
+    }
   }
 
   back_to_faculty() {
     this.selected_faculty = null;
+    this.form_data = null;
   }
   getDataKeys() {
     return Object.keys(this.source_data[0]);
@@ -190,22 +233,24 @@ export class StudentComponent {
   }
 
   findFirstNullScoreIndex() {
-  for (let parentIndex = 0; parentIndex < this.form_data.length; parentIndex++) {
-    const questions = this.form_data[parentIndex].questions;
-    for (let childIndex = 0; childIndex < questions.length; childIndex++) {
-      if (questions[childIndex].score === null) {
-        return { parentIndex, childIndex };
+    for (
+      let parentIndex = 0;
+      parentIndex < this.form_data.length;
+      parentIndex++
+    ) {
+      const questions = this.form_data[parentIndex].questions;
+      for (let childIndex = 0; childIndex < questions.length; childIndex++) {
+        if (questions[childIndex].score === null) {
+          return { parentIndex, childIndex };
+        }
       }
     }
+
+    return null;
   }
 
-  return null;
-}
-
-
   submit() {
-
-    if(this.findFirstNullScoreIndex() === null){
+    if (this.findFirstNullScoreIndex() === null) {
       const questionnaire: any = {};
       this.form_data.forEach((category: any, indx: number) => {
         questionnaire[`category_${indx + 1}`] = category.questions.map(
@@ -214,7 +259,7 @@ export class StudentComponent {
           })
         );
       });
-  
+
       const evaluation_data = {
         student_id: this._auth_service.getUser()._id,
         teacher_id: this.selected_faculty._id,
@@ -240,35 +285,33 @@ export class StudentComponent {
               summary: 'Student Evaluation Hub',
               detail: 'Form Submitted Successfully',
             });
-            this._auth_service.update_forms(this.selected_faculty._id)
-            this.back_to_faculty()
+            this._auth_service.update_forms(this.selected_faculty._id);
+            this.back_to_faculty();
           },
           (err) => {
             this._loadingService.hide();
             this._toast_service.show({
-              severity: 'Error',
+              severity: 'error',
               summary: 'Student Evaluation Hub',
               detail: 'Form Submitted Unsuccessfully',
             });
           }
         );
-    }else{
-      this.form_validation_dialog = true
+    } else {
+      this.form_validation_dialog = true;
     }
-    
   }
-
 
   handle_signout() {
     this._auth_service.sign_out();
     this._navigation.navigate_to_link();
   }
 
-  is_complete(id:string){
-    if(this._auth_service.get_forms()){
-      return id in this._auth_service.get_forms()
-    }else{
-      return false
+  is_complete(id: string) {
+    if (this._auth_service.get_forms()) {
+      return id in this._auth_service.get_forms();
+    } else {
+      return false;
     }
   }
 }
